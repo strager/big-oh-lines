@@ -6,10 +6,12 @@ edition = "2021"
 [workspace]
 members = [
     "bol_linear",
+    "bol_table",
 ]
 
 [dependencies]
 bol_linear = { path = "bol_linear" }
+bol_table = { path = "bol_table" }
 libc = "0.2.141"
 
 [lib]

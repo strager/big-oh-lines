@@ -1,0 +1,11 @@
+[package]
+name = "bol_table"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+
+[lib]
+crate-type = ["dylib"]
+doctest = false
+test = false

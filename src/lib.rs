@@ -1,4 +1,4 @@
-const IMPLEMENTATION_NAMES: &[&'static [u8]] = &[b"libbol_linear.so\0"];
+const IMPLEMENTATION_NAMES: &[&'static [u8]] = &[b"libbol_linear.so\0", b"libbol_table.so\0"];
 
 pub struct Implementation {
     pub name: &'static [u8],
