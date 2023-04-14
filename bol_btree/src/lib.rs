@@ -86,6 +86,8 @@ impl BOL {
             COMPARISONS.with(|cell| cell.set(0));
         }
 
+        // TODO(strager): Use a the Rust cursors API when it exists.
+        // https://github.com/rust-lang/rfcs/issues/1778
         let found_range: std::collections::btree_map::Range<LineOffset, usize> =
             self.line_offsets.range(..=LineOffset(offset));
         let line: usize = *found_range.last().unwrap().1;
