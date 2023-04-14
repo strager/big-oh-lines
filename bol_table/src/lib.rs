@@ -49,6 +49,6 @@ pub unsafe extern "C" fn bol_stats(bol: *mut ()) -> BOLStats {
     let bol: &BOL = &*(bol as *mut BOL);
     BOLStats {
         comparisons: 0,
-        memory: std::mem::size_of::<BOL>() + bol.table.len() * std::mem::size_of::<usize>(),
+        memory: std::mem::size_of::<BOL>() + bol.table.capacity() * std::mem::size_of::<usize>(),
     }
 }
