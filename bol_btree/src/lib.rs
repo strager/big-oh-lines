@@ -99,35 +99,6 @@ impl BOL {
     }
 }
 
-struct CountingRangeBounds {
-    needle: usize,
-    #[cfg(feature = "bol_stats")]
-    comparisons: std::sync::atomic::AtomicU64,
-}
-
-impl std::ops::RangeBounds<usize> for &mut CountingRangeBounds {
-    fn start_bound(&self) -> std::ops::Bound<&usize> {
-        std::ops::Bound::Unbounded
-    }
-
-    fn end_bound(&self) -> std::ops::Bound<&usize> {
-        std::ops::Bound::Included(&self.needle)
-    }
-
-    fn contains<U>(&self, item: &U) -> bool
-    where
-        U: PartialOrd<usize> + ?Sized,
-    {
-        #[cfg(feature = "bol_stats")]
-        {
-            self.comparisons
-                .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        }
-
-        *item <= self.needle
-    }
-}
-
 #[no_mangle]
 pub unsafe extern "C" fn bol_create(text: *const u8, text_len: usize) -> *mut () {
     Box::into_raw(Box::new(BOL::new(std::slice::from_raw_parts(
