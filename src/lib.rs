@@ -5,7 +5,7 @@ const IMPLEMENTATION_NAMES: &[&'static str] =
     &["bol_bsearch", "bol_btree", "bol_linear", "bol_table"];
 
 pub struct Implementation {
-    pub name: &'static [u8],
+    pub name: &'static str,
     pub raw_create: unsafe extern "C" fn(*const u8, usize) -> *mut (),
     pub raw_offset_to_line: unsafe extern "C" fn(*mut (), usize) -> usize,
     pub raw_destroy: unsafe extern "C" fn(*mut ()),
@@ -26,15 +26,11 @@ impl Implementation {
             }
         }
     }
-
-    pub fn name_string(&self) -> String {
-        c_string_to_string(self.name)
-    }
 }
 
 impl std::fmt::Display for Implementation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", self.name_string())?;
+        write!(f, "{}", self.name)?;
         Ok(())
     }
 }
@@ -92,7 +88,7 @@ pub fn load_implementation(name: &'static str) -> Implementation {
             );
         }
         Implementation {
-            name: name.as_bytes(),
+            name: name,
             raw_create: std::mem::transmute::<_, unsafe extern "C" fn(*const u8, usize) -> *mut ()>(
                 load_symbol(dl, b"bol_create\0"),
             ),

@@ -5,7 +5,7 @@ use criterion::criterion_main;
 fn benchmark(c: &mut criterion::Criterion) {
     let imps: Vec<Implementation> = load_implementations();
     for imp in imps {
-        c.bench_function(&imp.name_string(), |b: &mut criterion::Bencher| {
+        c.bench_function(imp.name, |b: &mut criterion::Bencher| {
             let text: &[u8] = b"hello\nworld\n\nlast line";
             let mut bol: BOL = imp.create(text);
             b.iter(|| {
