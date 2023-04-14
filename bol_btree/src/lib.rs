@@ -1,4 +1,6 @@
-#[cfg(feature = "bol_stats")]
+#![feature(allocator_api)]
+#![feature(btreemap_alloc)]
+
 use bol_base::*;
 
 #[cfg(feature = "bol_stats")]
@@ -42,15 +44,23 @@ struct BOL {
     // Offset in the text where each line starts.
     // Key: offset
     // Value: line
-    line_offsets: std::collections::BTreeMap<LineOffset, usize>,
+    line_offsets:
+        std::collections::BTreeMap<LineOffset, usize, TrackingAllocator<std::alloc::Global>>,
+    #[cfg(feature = "bol_stats")]
+    line_offsets_memory: usize,
     #[cfg(feature = "bol_stats")]
     comparisons: u64,
 }
 
 impl BOL {
     fn new(text: &[u8]) -> BOL {
-        let mut line_offsets: std::collections::BTreeMap<LineOffset, usize> =
-            std::collections::BTreeMap::new();
+        #[cfg(feature = "bol_stats")]
+        let live_bytes_before: usize = get_tracking_allocator_live_bytes();
+        let mut line_offsets: std::collections::BTreeMap<
+            LineOffset,
+            usize,
+            TrackingAllocator<std::alloc::Global>,
+        > = std::collections::BTreeMap::new_in(TrackingAllocator::new(std::alloc::Global));
         line_offsets.insert(LineOffset(0), 0);
         for i in 0..text.len() {
             if text[i] == b'\n' {
@@ -59,8 +69,12 @@ impl BOL {
                 assert!(existing.is_none());
             }
         }
+        #[cfg(feature = "bol_stats")]
+        let live_bytes_after: usize = get_tracking_allocator_live_bytes();
         BOL {
             line_offsets: line_offsets,
+            #[cfg(feature = "bol_stats")]
+            line_offsets_memory: live_bytes_after - live_bytes_before,
             #[cfg(feature = "bol_stats")]
             comparisons: 0,
         }
@@ -137,7 +151,6 @@ pub unsafe extern "C" fn bol_stats(bol: *mut ()) -> BOLStats {
     let bol: &BOL = &*(bol as *mut BOL);
     BOLStats {
         comparisons: bol.comparisons,
-        // FIXME(strager): Memory usage is wrong.
-        memory: std::mem::size_of::<BOL>() + bol.line_offsets.len() * std::mem::size_of::<usize>(),
+        memory: std::mem::size_of::<BOL>() + bol.line_offsets_memory,
     }
 }
