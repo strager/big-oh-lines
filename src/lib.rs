@@ -2,7 +2,41 @@ const IMPLEMENTATION_NAMES: &[&'static [u8]] = &[b"libbol_linear.so\0"];
 
 pub struct Implementation {
     pub name: &'static [u8],
-    pub add: extern "C" fn(usize, usize) -> usize,
+    pub raw_create: unsafe extern "C" fn(*const u8, usize) -> *mut (),
+    pub raw_offset_to_line: unsafe extern "C" fn(*mut (), usize) -> usize,
+    pub raw_destroy: unsafe extern "C" fn(*mut ()),
+}
+
+impl Implementation {
+    pub fn create(&self, text: &[u8]) -> BOL {
+        unsafe {
+            BOL {
+                pointer: (self.raw_create)(text.as_ptr(), text.len()),
+                raw_offset_to_line: self.raw_offset_to_line,
+                raw_destroy: self.raw_destroy,
+            }
+        }
+    }
+}
+
+pub struct BOL {
+    pointer: *mut (),
+    raw_offset_to_line: unsafe extern "C" fn(*mut (), usize) -> usize,
+    raw_destroy: unsafe extern "C" fn(*mut ()),
+}
+
+impl BOL {
+    pub fn offset_to_line(&mut self, offset: usize) -> usize {
+        unsafe { (self.raw_offset_to_line)(self.pointer, offset) }
+    }
+}
+
+impl Drop for BOL {
+    fn drop(&mut self) {
+        unsafe {
+            (self.raw_destroy)(self.pointer);
+        }
+    }
 }
 
 pub fn load_implementations() -> Vec<Implementation> {
@@ -26,21 +60,33 @@ pub fn load_implementation(path: &'static [u8]) -> Implementation {
                 std::ffi::CStr::from_ptr(libc::dlerror()).to_string_lossy()
             );
         }
-        let symbol_raw: &[u8] = b"bol_add\0";
-        let bol_add: *mut libc::c_void =
-            libc::dlsym(dl, symbol_raw.as_ptr() as *const libc::c_char);
-        if bol_add.is_null() {
+        Implementation {
+            name: path,
+            raw_create: std::mem::transmute::<_, unsafe extern "C" fn(*const u8, usize) -> *mut ()>(
+                load_symbol(dl, b"bol_create\0"),
+            ),
+            raw_offset_to_line: std::mem::transmute::<
+                _,
+                unsafe extern "C" fn(*mut (), usize) -> usize,
+            >(load_symbol(dl, b"bol_offset_to_line\0")),
+            raw_destroy: std::mem::transmute::<_, unsafe extern "C" fn(*mut ())>(load_symbol(
+                dl,
+                b"bol_destroy\0",
+            )),
+        }
+    }
+}
+
+fn load_symbol(dl: *mut libc::c_void, symbol_name: &[u8]) -> *mut libc::c_void {
+    unsafe {
+        let f: *mut libc::c_void = libc::dlsym(dl, symbol_name.as_ptr() as *const libc::c_char);
+        if f.is_null() {
             panic!(
-                "could not load symbol {} in {}: {}",
-                String::from_utf8_lossy(symbol_raw),
-                String::from_utf8_lossy(path),
+                "could not load symbol {}: {}",
+                String::from_utf8_lossy(symbol_name),
                 std::ffi::CStr::from_ptr(libc::dlerror()).to_string_lossy()
             );
         }
-        let bol_add = std::mem::transmute::<_, extern "C" fn(usize, usize) -> usize>(bol_add);
-        Implementation {
-            name: path,
-            add: bol_add,
-        }
+        f
     }
 }
