@@ -1,4 +1,5 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::criterion_group;
+use criterion::criterion_main;
 
 fn fibonacci(n: u64) -> u64 {
     match n {
@@ -8,8 +9,17 @@ fn fibonacci(n: u64) -> u64 {
     }
 }
 
-fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("fib 20", |b| b.iter(|| fibonacci(black_box(20))));
+fn criterion_benchmark(c: &mut criterion::Criterion) {
+    let imps: Vec<Implementation> = load_implementations();
+    for imp in imps {
+        c.bench_function(imp.name_string(), |b: criterion::Bencher| {
+            let text: &[u8] = b"hello\nworld\n\nlast line";
+            let mut bol: BOL = imp.create(text);
+            b.iter(|| {
+                criterion::black_box(criterion::black_box(bol).offset_to_line(9));
+            });
+        });
+    }
 }
 
 criterion_group!(benches, criterion_benchmark);
