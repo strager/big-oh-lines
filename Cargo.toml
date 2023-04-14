@@ -23,6 +23,10 @@ bol_linear = { path = "bol_linear" }
 bol_table = { path = "bol_table" }
 libc = { workspace = true }
 
+[[bin]]
+name = "stats"
+required-features = ["bol_stats"]
+
 [lib]
 doctest = false
 test = false

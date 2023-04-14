@@ -33,6 +33,7 @@ impl<'text> BOL<'text> {
 pub unsafe extern "C" fn bol_create(text: *const u8, text_len: usize) -> *mut () {
     Box::into_raw(Box::new(BOL {
         text: std::slice::from_raw_parts(text, text_len),
+        #[cfg(feature = "bol_stats")]
         comparisons: 0,
     })) as *mut ()
 }
