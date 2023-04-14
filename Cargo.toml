@@ -1,4 +1,17 @@
+[package]
+name = "big_oh_lines"
+version = "0.1.0"
+edition = "2021"
+
 [workspace]
 members = [
     "bol_linear",
 ]
+
+[dependencies]
+bol_linear = { path = "bol_linear" }
+libc = "0.2.141"
+
+[lib]
+doctest = false
+test = false

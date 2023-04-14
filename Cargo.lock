@@ -3,5 +3,19 @@
 version = 3
 
 [[package]]
+name = "big_oh_lines"
+version = "0.1.0"
+dependencies = [
+ "bol_linear",
+ "libc",
+]
+
+[[package]]
 name = "bol_linear"
 version = "0.1.0"
+
+[[package]]
+name = "libc"
+version = "0.2.141"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3304a64d199bb964be99741b7a14d26972741915b3649639149b2479bb46f4b5"
