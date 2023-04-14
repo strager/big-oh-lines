@@ -30,11 +30,15 @@ impl Implementation {
             }
         }
     }
+
+    pub fn name_string(&self) -> String {
+        c_string_to_string(self.name)
+    }
 }
 
 impl std::fmt::Display for Implementation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        write!(f, "{}", c_string_to_string(self.name))?;
+        write!(f, "{}", self.name_string())?;
         Ok(())
     }
 }
