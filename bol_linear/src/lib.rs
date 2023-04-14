@@ -1,8 +1,8 @@
-struct BOL {
-    text: Vec<u8>,
+struct BOL<'text> {
+    text: &'text [u8],
 }
 
-impl BOL {
+impl<'text> BOL<'text> {
     fn offset_to_line(&self, offset: usize) -> usize {
         let mut line: usize = 0;
         for i in 0..offset {
@@ -17,7 +17,7 @@ impl BOL {
 #[no_mangle]
 pub unsafe extern "C" fn bol_create(text: *const u8, text_len: usize) -> *mut () {
     Box::into_raw(Box::new(BOL {
-        text: Vec::<u8>::from(std::slice::from_raw_parts(text, text_len)),
+        text: std::slice::from_raw_parts(text, text_len),
     })) as *mut ()
 }
 

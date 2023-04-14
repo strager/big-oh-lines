@@ -8,30 +8,32 @@ pub struct Implementation {
 }
 
 impl Implementation {
-    pub fn create(&self, text: &[u8]) -> BOL {
+    pub fn create<'text>(&self, text: &'text [u8]) -> BOL<'text> {
         unsafe {
             BOL {
                 pointer: (self.raw_create)(text.as_ptr(), text.len()),
                 raw_offset_to_line: self.raw_offset_to_line,
                 raw_destroy: self.raw_destroy,
+                phantom_text: std::marker::PhantomData,
             }
         }
     }
 }
 
-pub struct BOL {
+pub struct BOL<'text> {
     pointer: *mut (),
     raw_offset_to_line: unsafe extern "C" fn(*mut (), usize) -> usize,
     raw_destroy: unsafe extern "C" fn(*mut ()),
+    phantom_text: std::marker::PhantomData<&'text [u8]>,
 }
 
-impl BOL {
+impl<'text> BOL<'text> {
     pub fn offset_to_line(&mut self, offset: usize) -> usize {
         unsafe { (self.raw_offset_to_line)(self.pointer, offset) }
     }
 }
 
-impl Drop for BOL {
+impl<'text> Drop for BOL<'text> {
     fn drop(&mut self) {
         unsafe {
             (self.raw_destroy)(self.pointer);
