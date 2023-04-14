@@ -6,6 +6,7 @@ edition = "2021"
 [workspace]
 members = [
     "bol_bsearch",
+    "bol_btree",
     "bol_linear",
     "bol_table",
 ]
@@ -17,6 +18,7 @@ libc = "0.2.141"
 [dependencies]
 bol_base = { workspace = true }
 bol_bsearch = { path = "bol_bsearch" }
+bol_btree = { path = "bol_btree" }
 bol_linear = { path = "bol_linear" }
 bol_table = { path = "bol_table" }
 libc = { workspace = true }
@@ -30,6 +32,7 @@ default = []
 bol_stats = [
     "bol_base/bol_stats",
     "bol_bsearch/bol_stats",
+    "bol_btree/bol_stats",
     "bol_linear/bol_stats",
     "bol_table/bol_stats",
 ]

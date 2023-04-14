@@ -8,6 +8,7 @@ version = "0.1.0"
 dependencies = [
  "bol_base",
  "bol_bsearch",
+ "bol_btree",
  "bol_linear",
  "bol_table",
  "libc",
@@ -19,6 +20,13 @@ version = "0.1.0"
 
 [[package]]
 name = "bol_bsearch"
+version = "0.1.0"
+dependencies = [
+ "bol_base",
+]
+
+[[package]]
+name = "bol_btree"
 version = "0.1.0"
 dependencies = [
  "bol_base",
