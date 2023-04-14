@@ -27,6 +27,13 @@ impl Implementation {
     }
 }
 
+impl std::fmt::Display for Implementation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", c_string_to_string(self.name))?;
+        Ok(())
+    }
+}
+
 pub struct BOL<'text> {
     pointer: *mut (),
     raw_offset_to_line: unsafe extern "C" fn(*mut (), usize) -> usize,
@@ -72,7 +79,7 @@ pub fn load_implementation(path: &'static [u8]) -> Implementation {
         if dl.is_null() {
             panic!(
                 "could not load {}: {}",
-                String::from_utf8_lossy(path),
+                c_string_to_string(path),
                 std::ffi::CStr::from_ptr(libc::dlerror()).to_string_lossy()
             );
         }
@@ -103,10 +110,14 @@ fn load_symbol(dl: *mut libc::c_void, symbol_name: &[u8]) -> *mut libc::c_void {
         if f.is_null() {
             panic!(
                 "could not load symbol {}: {}",
-                String::from_utf8_lossy(symbol_name),
+                c_string_to_string(symbol_name),
                 std::ffi::CStr::from_ptr(libc::dlerror()).to_string_lossy()
             );
         }
         f
     }
+}
+
+fn c_string_to_string(c_string: &[u8]) -> String {
+    String::from_utf8_lossy(&c_string[0..c_string.len() - 1]).into_owned()
 }

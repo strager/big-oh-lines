@@ -8,6 +8,6 @@ pub fn main() {
         let mut bol: BOL = imp.create(text);
         assert_eq!(bol.offset_to_line(b"hello\nwor".len()), 1);
         let stats: BOLStats = bol.stats();
-        eprintln!("{:?} {:?}", imp.name, stats);
+        eprintln!("{} {:?}", imp, stats);
     }
 }
