@@ -13,6 +13,7 @@ members = [
 
 [workspace.dependencies]
 bol_base = { path = "bol_base" }
+criterion = { version = "0.4.0", default-features = false }
 libc = "0.2.141"
 
 [dependencies]
@@ -21,11 +22,16 @@ bol_bsearch = { path = "bol_bsearch" }
 bol_btree = { path = "bol_btree" }
 bol_linear = { path = "bol_linear" }
 bol_table = { path = "bol_table" }
+criterion = { workspace = true }
 libc = { workspace = true }
 
 [[bin]]
 name = "stats"
 required-features = ["bol_stats"]
+
+[[bench]]
+name = "bench"
+harness = false
 
 [lib]
 doctest = false
