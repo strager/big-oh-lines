@@ -110,7 +110,7 @@ pub unsafe extern "C" fn bol_create(text: *const u8, text_len: usize) -> *mut ()
 
 #[no_mangle]
 pub unsafe extern "C" fn bol_offset_to_line(bol: *mut (), offset: usize) -> usize {
-    (&mut *(bol as *mut BOL)).offset_to_line(offset)
+    (*(bol as *mut BOL)).offset_to_line(offset)
 }
 
 #[no_mangle]
