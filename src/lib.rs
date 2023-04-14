@@ -1,3 +1,6 @@
+#[cfg(feature = "bol_stats")]
+use bol_base::*;
+
 const IMPLEMENTATION_NAMES: &[&'static [u8]] = &[b"libbol_linear.so\0", b"libbol_table.so\0"];
 
 pub struct Implementation {
@@ -5,6 +8,8 @@ pub struct Implementation {
     pub raw_create: unsafe extern "C" fn(*const u8, usize) -> *mut (),
     pub raw_offset_to_line: unsafe extern "C" fn(*mut (), usize) -> usize,
     pub raw_destroy: unsafe extern "C" fn(*mut ()),
+    #[cfg(feature = "bol_stats")]
+    pub raw_stats: unsafe extern "C" fn(*mut ()) -> BOLStats,
 }
 
 impl Implementation {
@@ -14,6 +19,8 @@ impl Implementation {
                 pointer: (self.raw_create)(text.as_ptr(), text.len()),
                 raw_offset_to_line: self.raw_offset_to_line,
                 raw_destroy: self.raw_destroy,
+                #[cfg(feature = "bol_stats")]
+                raw_stats: self.raw_stats,
                 phantom_text: std::marker::PhantomData,
             }
         }
@@ -24,12 +31,19 @@ pub struct BOL<'text> {
     pointer: *mut (),
     raw_offset_to_line: unsafe extern "C" fn(*mut (), usize) -> usize,
     raw_destroy: unsafe extern "C" fn(*mut ()),
+    #[cfg(feature = "bol_stats")]
+    raw_stats: unsafe extern "C" fn(*mut ()) -> BOLStats,
     phantom_text: std::marker::PhantomData<&'text [u8]>,
 }
 
 impl<'text> BOL<'text> {
     pub fn offset_to_line(&mut self, offset: usize) -> usize {
         unsafe { (self.raw_offset_to_line)(self.pointer, offset) }
+    }
+
+    #[cfg(feature = "bol_stats")]
+    pub fn stats(&mut self) -> BOLStats {
+        unsafe { (self.raw_stats)(self.pointer) }
     }
 }
 
@@ -75,6 +89,10 @@ pub fn load_implementation(path: &'static [u8]) -> Implementation {
                 dl,
                 b"bol_destroy\0",
             )),
+            #[cfg(feature = "bol_stats")]
+            raw_stats: std::mem::transmute::<_, unsafe extern "C" fn(*mut ()) -> BOLStats>(
+                load_symbol(dl, b"bol_stats\0"),
+            ),
         }
     }
 }

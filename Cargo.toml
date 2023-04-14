@@ -9,11 +9,24 @@ members = [
     "bol_table",
 ]
 
+[workspace.dependencies]
+bol_base = { path = "bol_base" }
+libc = "0.2.141"
+
 [dependencies]
+bol_base = { workspace = true }
 bol_linear = { path = "bol_linear" }
 bol_table = { path = "bol_table" }
-libc = "0.2.141"
+libc = { workspace = true }
 
 [lib]
 doctest = false
 test = false
+
+[features]
+default = []
+bol_stats = [
+    "bol_base/bol_stats",
+    "bol_linear/bol_stats",
+    "bol_table/bol_stats",
+]

@@ -1,3 +1,6 @@
+#[cfg(feature = "bol_stats")]
+use bol_base::*;
+
 struct BOL {
     table: Vec<usize>,
 }
@@ -38,4 +41,14 @@ pub unsafe extern "C" fn bol_offset_to_line(bol: *mut (), offset: usize) -> usiz
 #[no_mangle]
 pub unsafe extern "C" fn bol_destroy(bol: *mut ()) {
     std::mem::drop(Box::from_raw(bol as *mut BOL));
+}
+
+#[cfg(feature = "bol_stats")]
+#[no_mangle]
+pub unsafe extern "C" fn bol_stats(bol: *mut ()) -> BOLStats {
+    let bol: &BOL = &*(bol as *mut BOL);
+    BOLStats {
+        comparisons: 0,
+        memory: std::mem::size_of::<BOL>() + bol.table.len() * std::mem::size_of::<usize>(),
+    }
 }

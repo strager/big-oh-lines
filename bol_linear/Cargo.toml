@@ -4,8 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+bol_base = { workspace = true }
 
 [lib]
 crate-type = ["dylib"]
 doctest = false
 test = false
+
+[features]
+default = []
+bol_stats = []
