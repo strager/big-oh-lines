@@ -1,12 +1,8 @@
 #[cfg(feature = "bol_stats")]
 use bol_base::*;
 
-const IMPLEMENTATION_NAMES: &[&'static [u8]] = &[
-    b"libbol_bsearch.so\0",
-    b"libbol_btree.so\0",
-    b"libbol_linear.so\0",
-    b"libbol_table.so\0",
-];
+const IMPLEMENTATION_NAMES: &[&'static str] =
+    &["bol_bsearch", "bol_btree", "bol_linear", "bol_table"];
 
 pub struct Implementation {
     pub name: &'static [u8],
@@ -74,26 +70,29 @@ impl<'text> Drop for BOL<'text> {
 pub fn load_implementations() -> Vec<Implementation> {
     IMPLEMENTATION_NAMES
         .iter()
-        .map(|imp_path: &&[u8]| load_implementation(*imp_path))
+        .map(|name: &&str| load_implementation(*name))
         .collect::<Vec<Implementation>>()
 }
 
-pub fn load_implementation(path: &'static [u8]) -> Implementation {
-    assert!(!path.is_empty());
-    assert!(path[path.len() - 1] == b'\0');
+pub fn load_implementation(name: &'static str) -> Implementation {
+    #[cfg(any(target_os = "freebsd", target_os = "linux"))]
+    let (dll_prefix, dll_suffix): (&str, &str) = ("lib", ".so");
+    #[cfg(any(target_os = "macos"))]
+    let (dll_prefix, dll_suffix): (&str, &str) = ("lib", ".dylib");
+    let dll_name: Vec<u8> = format!("{}{}{}\0", dll_prefix, name, dll_suffix).into_bytes();
 
     unsafe {
         let dl: *mut libc::c_void =
-            libc::dlopen(path.as_ptr() as *const libc::c_char, libc::RTLD_LAZY);
+            libc::dlopen(dll_name.as_ptr() as *const libc::c_char, libc::RTLD_LAZY);
         if dl.is_null() {
             panic!(
                 "could not load {}: {}",
-                c_string_to_string(path),
+                c_string_to_string(&dll_name[..]),
                 std::ffi::CStr::from_ptr(libc::dlerror()).to_string_lossy()
             );
         }
         Implementation {
-            name: path,
+            name: name.as_bytes(),
             raw_create: std::mem::transmute::<_, unsafe extern "C" fn(*const u8, usize) -> *mut ()>(
                 load_symbol(dl, b"bol_create\0"),
             ),
