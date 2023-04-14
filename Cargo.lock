@@ -7,6 +7,7 @@ name = "big_oh_lines"
 version = "0.1.0"
 dependencies = [
  "bol_base",
+ "bol_bsearch",
  "bol_linear",
  "bol_table",
  "libc",
@@ -15,6 +16,13 @@ dependencies = [
 [[package]]
 name = "bol_base"
 version = "0.1.0"
+
+[[package]]
+name = "bol_bsearch"
+version = "0.1.0"
+dependencies = [
+ "bol_base",
+]
 
 [[package]]
 name = "bol_linear"
