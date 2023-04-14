@@ -1,6 +1,7 @@
 #![feature(allocator_api)]
 #![feature(btreemap_alloc)]
 
+use bol_base::define_bol_c_api;
 use bol_base::*;
 
 #[cfg(feature = "bol_stats")]
@@ -99,31 +100,14 @@ impl BOL {
 
         line
     }
-}
 
-#[no_mangle]
-pub unsafe extern "C" fn bol_create(text: *const u8, text_len: usize) -> *mut () {
-    Box::into_raw(Box::new(BOL::new(std::slice::from_raw_parts(
-        text, text_len,
-    )))) as *mut ()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn bol_offset_to_line(bol: *mut (), offset: usize) -> usize {
-    (*(bol as *mut BOL)).offset_to_line(offset)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn bol_destroy(bol: *mut ()) {
-    std::mem::drop(Box::from_raw(bol as *mut BOL));
-}
-
-#[cfg(feature = "bol_stats")]
-#[no_mangle]
-pub unsafe extern "C" fn bol_stats(bol: *mut ()) -> BOLStats {
-    let bol: &BOL = &*(bol as *mut BOL);
-    BOLStats {
-        comparisons: bol.comparisons,
-        memory: std::mem::size_of::<BOL>() + bol.line_offsets_memory,
+    #[cfg(feature = "bol_stats")]
+    fn stats(&self) -> BOLStats {
+        BOLStats {
+            comparisons: self.comparisons,
+            memory: std::mem::size_of::<BOL>() + self.line_offsets_memory,
+        }
     }
 }
+
+define_bol_c_api!(BOL);

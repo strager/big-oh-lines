@@ -1,3 +1,5 @@
+use bol_base::define_bol_c_api;
+
 #[cfg(feature = "bol_stats")]
 use bol_base::*;
 
@@ -24,31 +26,15 @@ impl BOL {
     fn offset_to_line(&self, offset: usize) -> usize {
         self.table[offset]
     }
-}
 
-#[no_mangle]
-pub unsafe extern "C" fn bol_create(text: *const u8, text_len: usize) -> *mut () {
-    Box::into_raw(Box::new(BOL::new(std::slice::from_raw_parts(
-        text, text_len,
-    )))) as *mut ()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn bol_offset_to_line(bol: *mut (), offset: usize) -> usize {
-    (*(bol as *mut BOL)).offset_to_line(offset)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn bol_destroy(bol: *mut ()) {
-    std::mem::drop(Box::from_raw(bol as *mut BOL));
-}
-
-#[cfg(feature = "bol_stats")]
-#[no_mangle]
-pub unsafe extern "C" fn bol_stats(bol: *mut ()) -> BOLStats {
-    let bol: &BOL = &*(bol as *mut BOL);
-    BOLStats {
-        comparisons: 0,
-        memory: std::mem::size_of::<BOL>() + bol.table.capacity() * std::mem::size_of::<usize>(),
+    #[cfg(feature = "bol_stats")]
+    fn stats(&self) -> BOLStats {
+        BOLStats {
+            comparisons: 0,
+            memory: std::mem::size_of::<BOL>()
+                + self.table.capacity() * std::mem::size_of::<usize>(),
+        }
     }
 }
+
+define_bol_c_api!(BOL);
