@@ -7,15 +7,6 @@ pub struct BOLStats {
     pub memory: usize,
 }
 
-impl BOLStats {
-    pub fn new() -> BOLStats {
-        BOLStats {
-            comparisons: 0,
-            memory: 0,
-        }
-    }
-}
-
 static LIVE_BYTES: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
 
 pub fn get_tracking_allocator_live_bytes() -> usize {
