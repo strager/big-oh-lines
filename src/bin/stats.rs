@@ -6,32 +6,34 @@ static mut NEED_COMMA: bool = false;
 pub fn main() {
     println!("[");
 
-    for (text_type, text) in [
-        ("realisticish", generate_realisticish_text(1000)),
-        ("equal", generate_equal_length_line_text(10, 30)),
-    ] {
-        for (lookup_type, offsets) in [
-            ("uniform", &generate_uniform_offsets(&text, 50)[..]),
-            (
-                "near beginning",
-                &generate_normal_offsets(&text, 50, text.len() * 1 / 100, 10.0)[..],
-            ),
-            (
-                "near end",
-                &generate_normal_offsets(&text, 50, text.len() * 99 / 100, 10.0)[..],
-            ),
-            ("at beginning", &[0; 50]),
-            ("at end", &[text.len() - 1; 50]),
+    for line_count in 1..1000 {
+        for (text_type, text) in [
+            ("realisticish", generate_realisticish_text(line_count)),
+            ("equal", generate_equal_length_line_text(line_count, 30)),
         ] {
-            test(&format!(
-                "\"text_type\": \"{}\",\n\"text_lines\": {},\n\"text_bytes\": {},\n\"lookup_type\": \"{}\",\n\"lookups\": {}",
-                text_type,
-                count_lines(&text),
-                text.len(),
-                lookup_type,
-                offsets.len(),
-            ),
-                &text, &offsets);
+            for (lookup_type, offsets) in [
+                ("uniform", &generate_uniform_offsets(&text, 50)[..]),
+                (
+                    "near beginning",
+                    &generate_normal_offsets(&text, 50, text.len() * 1 / 100, 10.0)[..],
+                ),
+                (
+                    "near end",
+                    &generate_normal_offsets(&text, 50, text.len() * 99 / 100, 10.0)[..],
+                ),
+                ("at beginning", &[0; 50]),
+                ("at end", &[text.len() - 1; 50]),
+            ] {
+                test(&format!(
+                    "\"text_type\": \"{}\",\n\"text_lines\": {},\n\"text_bytes\": {},\n\"lookup_type\": \"{}\",\n\"lookups\": {}",
+                    text_type,
+                    count_lines(&text),
+                    text.len(),
+                    lookup_type,
+                    offsets.len(),
+                ),
+                    &text, &offsets);
+            }
         }
     }
 
