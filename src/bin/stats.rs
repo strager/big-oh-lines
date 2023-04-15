@@ -9,6 +9,12 @@ pub fn main() {
     test("realisticish, 50 near-beginning lookups", &text, &offsets);
     let offsets = generate_normal_offsets(&text, 50, text.len() * 99 / 100, 10.0);
     test("realisticish, 50 near-end lookups", &text, &offsets);
+    test("realisticish, 50 at-beginning lookups", &text, &[0; 50]);
+    test(
+        "realisticish, 50 at-end lookups",
+        &text,
+        &[text.len() - 1; 50],
+    );
 
     let text = generate_equal_length_line_text(10, 30);
     let offsets = generate_uniform_offsets(&text, 50);
