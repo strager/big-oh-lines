@@ -1,4 +1,5 @@
 import type {ThreadGenerator} from '@motion-canvas/core/lib/threading';
+import {createSignal} from '@motion-canvas/core/lib/signals';
 import {Circle, Line} from '@motion-canvas/2d/lib/components';
 import {all} from '@motion-canvas/core/lib/flow';
 import {createRef} from '@motion-canvas/core/lib/utils';
@@ -25,33 +26,32 @@ for (let seriesSamples of serieses.values()) {
 }
 
 export default makeScene2D(function* (view) {
-    let lines = [];
+    let maxX = 0;
+
+    let xS = createSignal(0);
+
     for (let [key, seriesSamples] of serieses.entries()) {
         if (!key.endsWith(',near beginning,equal')) {
             continue;
         }
-        let previousPoint = null;
-        for (let sample of seriesSamples) {
-            let point = [sample.text_lines, -sample.comparisons];
-            if (previousPoint !== null) {
-                lines.push(createRef<Line>());
-                view.add(
-                    <Line
-                        ref={lines.at(-1)}
-                        x={0}
-                        y={0}
-                        lineWidth={2}
-                        end={0}
-                        points={[previousPoint, point]}
-                        stroke="#e13238"
-                    />,
-                );
-            }
-            previousPoint = point;
-        }
+        let points = seriesSamples.map(sample => [sample.text_lines, -sample.comparisons]);
+        maxX = Math.max(points.length, maxX);
+        let pointsS = createSignal(() => points.slice(0, xS()));
+        let line = createRef();
+        view.add(
+            <Line
+                ref={line}
+                x={0}
+                y={0}
+                lineWidth={2}
+                end={1}
+                points={pointsS}
+                stroke="#e13238"
+            />,
+        );
     }
 
-    for (let line of lines) {
-        yield* line().end(1.0, 0.001, linear);
+    for (; xS() < maxX; xS(xS() + 1)) {
+        yield null;
     }
 });
