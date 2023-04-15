@@ -9,5 +9,5 @@ International License (CC-BY-NC-ND-4.0)](LICENSE)
 ## Commands
 
     $ cargo +nightly test
-    $ cargo +nightly run --features=bol_stats
+    $ cargo +nightly run --features=bol_stats >data.json
     $ cargo +nightly bench
