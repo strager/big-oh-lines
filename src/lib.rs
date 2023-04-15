@@ -132,7 +132,7 @@ pub fn generate_random_text<Distribution: rand::distributions::Distribution<usiz
 ) -> Vec<u8> {
     use rand::SeedableRng;
     let mut text: Vec<u8> = Vec::<u8>::with_capacity(line_count * 80);
-    let mut rng: rand_pcg::Lcg64Xsh32 = rand_pcg::Lcg64Xsh32::seed_from_u64(line_count as u64);
+    let mut rng: rand_pcg::Lcg64Xsh32 = rand_pcg::Lcg64Xsh32::seed_from_u64(0);
     for _ in 0..line_count {
         let line_length: usize = line_length_distribution.sample(&mut rng);
         text.resize(text.len() + line_length, b'x');
