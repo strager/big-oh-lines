@@ -21,7 +21,7 @@ for (let sample of data) {
 
 export default makeScene2D(function* (view) {
     function getX(sample) {
-        return sample.text_bytes / 10;
+        return sample.text_bytes / 30000;
     }
 
     let xs = new Set();
@@ -55,7 +55,7 @@ export default makeScene2D(function* (view) {
         });
 
         let cumulativeDistances = [0];
-        for (let i = 0; i < xs.length - 1; ++i) {
+        for (let i = 0; i < points.length - 1; ++i) {
             let p0 = points[i];
             let p1 = points[i + 1];
             let dx = p0[0] - p1[0];
@@ -79,6 +79,8 @@ export default makeScene2D(function* (view) {
             />,
         );
         let maxTextWidth = 1000;
+        // FIXME(strager): points[iS()] breaks with bol_linear with large
+        // indexes.
         view.add(<Txt
             text={seriesName}
             textAlign="left"
