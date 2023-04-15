@@ -1,6 +1,6 @@
 import data from '../../../data.json';
 import type {ThreadGenerator} from '@motion-canvas/core/lib/threading';
-import {Circle, Line} from '@motion-canvas/2d/lib/components';
+import {Circle, Line, Txt, Rect} from '@motion-canvas/2d/lib/components';
 import {all} from '@motion-canvas/core/lib/flow';
 import {createRef} from '@motion-canvas/core/lib/utils';
 import {createSignal} from '@motion-canvas/core/lib/signals';
@@ -77,6 +77,16 @@ export default makeScene2D(function* (view) {
                 stroke="#e13238"
             />,
         );
+        let maxTextWidth = 1000;
+        view.add(<Txt
+            text={seriesName}
+            textAlign="left"
+            minWidth={maxTextWidth}
+            fill="#e13238"
+            x={createSignal(() => points[iS()][0] + maxTextWidth/2)}
+            y={createSignal(() => points[iS()][1])}
+            width={500}
+        />);
     }
     for (; iS() < xs.length - 1; iS(iS() + 1)) {
         // FIXME(strager): This still causes jitter.
