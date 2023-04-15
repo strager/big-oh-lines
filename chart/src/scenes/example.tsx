@@ -18,29 +18,25 @@ for (let sample of data) {
     }
     seriesSamples.push(sample);
 }
-for (let seriesSamples of serieses.values()) {
-    seriesSamples.sort((a, b) => {
-        if (a.text_lines < b.text_lines) return -1;
-        if (a.text_lines > b.text_lines) return +1;
-        return 0;
-    });
-}
 
 export default makeScene2D(function* (view) {
     function getX(sample) {
         return sample.text_bytes / 10;
     }
 
-    let seriesNames = [];
     let xs = new Set();
-    for (let [seriesName, seriesSamples] of serieses.entries()) {
-        if (!seriesName.endsWith(',near beginning,realisticish')) {
+    let serieses = new Map();
+    for (let sample of data) {
+        if (!(sample.lookup_type === 'near beginning' && sample.text_type === 'realisticish')) {
             continue;
         }
-        seriesNames.push(seriesName);
-        for (let sample of seriesSamples) {
-            xs.add(getX(sample));
+        let seriesSamples = serieses.get(sample.imp);
+        if (seriesSamples === undefined) {
+            seriesSamples = [];
+            serieses.set(sample.imp, seriesSamples);
         }
+        seriesSamples.push(sample);
+        xs.add(getX(sample));
     }
     xs = [...xs].sort((a, b) => {
         if (a < b) return -1;
@@ -49,9 +45,14 @@ export default makeScene2D(function* (view) {
     });
 
     let iS = createSignal(0);
-    for (let seriesName of seriesNames) {
+    for (let seriesName of serieses.keys()) {
         let seriesSamples = serieses.get(seriesName);
         let points = seriesSamples.map((sample) => [getX(sample), -sample.comparisons]);
+        points.sort((a, b) => {
+            if (a[0] < b[0]) return -1;
+            if (a[0] > b[0]) return +1;
+            return 0;
+        });
 
         let cumulativeDistances = [0];
         for (let i = 0; i < xs.length - 1; ++i) {
