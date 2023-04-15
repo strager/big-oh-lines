@@ -15,6 +15,8 @@ members = [
 bol_base = { path = "bol_base" }
 criterion = { version = "0.4.0", default-features = false }
 libc = "0.2.141"
+rand = { version = "0.8.5", default-features = false, features = ["alloc"] }
+rand_pcg = { version = "0.3.1", default-features = false }
 
 [dependencies]
 bol_base = { workspace = true }
@@ -24,6 +26,8 @@ bol_linear = { path = "bol_linear" }
 bol_table = { path = "bol_table" }
 criterion = { workspace = true }
 libc = { workspace = true }
+rand = { workspace = true }
+rand_pcg = { workspace = true }
 
 [[bin]]
 name = "stats"
