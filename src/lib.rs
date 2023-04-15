@@ -397,3 +397,34 @@ pub fn generate_realisticish_text(line_count: usize) -> Vec<u8> {
         &rand::distributions::WeightedIndex::new(&weights).unwrap(),
     )
 }
+
+pub fn generate_uniform_offsets(text: &[u8], count: usize) -> Vec<usize> {
+    use rand::distributions::uniform::SampleRange;
+    use rand::SeedableRng;
+    let mut rng: rand_pcg::Lcg64Xsh32 = rand_pcg::Lcg64Xsh32::seed_from_u64(count as u64);
+    let distribution = 0..text.len();
+    (0..count)
+        .map(|_| distribution.clone().sample_single(&mut rng))
+        .collect::<Vec<usize>>()
+}
+
+pub fn generate_normal_offsets(text: &[u8], count: usize, mean: usize, std_dev: f32) -> Vec<usize> {
+    use rand::SeedableRng;
+    use rand_distr::Distribution;
+    let mut rng: rand_pcg::Lcg64Xsh32 = rand_pcg::Lcg64Xsh32::seed_from_u64(count as u64);
+    let distribution: rand_distr::Normal<f32> =
+        rand_distr::Normal::new(mean as f32, std_dev).unwrap();
+    (0..count)
+        .map(|_| {
+            let mut raw_index: f32 = distribution.sample(&mut rng);
+            if raw_index < 0.0 {
+                raw_index = 0.0;
+            }
+            let mut index: usize = raw_index as usize;
+            if index >= text.len() {
+                index = text.len() - 1;
+            }
+            index
+        })
+        .collect::<Vec<usize>>()
+}
