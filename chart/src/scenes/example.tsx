@@ -24,7 +24,7 @@ export default makeScene2D(function* (view) {
         return sample.text_bytes / 30000;
     }
 
-    let xs = new Set();
+    let maxX = 0;
     let serieses = new Map();
     for (let sample of data) {
         if (!(sample.lookup_type === 'near beginning' && sample.text_type === 'realisticish')) {
@@ -36,15 +36,10 @@ export default makeScene2D(function* (view) {
             serieses.set(sample.imp, seriesSamples);
         }
         seriesSamples.push(sample);
-        xs.add(getX(sample));
+        maxX = Math.max(maxX, getX(sample));
     }
-    xs = [...xs].sort((a, b) => {
-        if (a < b) return -1;
-        if (a > b) return +1;
-        return 0;
-    });
 
-    let iS = createSignal(0);
+    let xS = createSignal(0);
     for (let seriesName of serieses.keys()) {
         let seriesSamples = serieses.get(seriesName);
         let points = seriesSamples.map((sample) => [getX(sample), -sample.comparisons]);
@@ -53,6 +48,15 @@ export default makeScene2D(function* (view) {
             if (a[0] > b[0]) return +1;
             return 0;
         });
+
+        function getPointIndex(x) {
+          for (let i = 0; i < points.length; ++i) {
+            if (points[i][0] > x) {
+              return i-1;
+            }
+          }
+          return points.length - 1;
+        }
 
         let cumulativeDistances = [0];
         for (let i = 0; i < points.length - 1; ++i) {
@@ -65,7 +69,25 @@ export default makeScene2D(function* (view) {
         }
         let totalDistance = cumulativeDistances.at(-1);
 
-        let endS = createSignal(() => cumulativeDistances[iS()] / totalDistance);
+        let dataS = createSignal(() => {
+          let x = xS();
+          let i = getPointIndex(x);
+          if (i+1 >= points.length) {
+            return {
+              end: totalDistance,
+              y: points[points.length - 1][1],
+            };
+          }
+          let p0 = points[i];
+          let p1 = points[i + 1];
+          let t = (x - p0[0]) / (p1[0] - p0[0]);
+          let dd = cumulativeDistances[i+1] - cumulativeDistances[i];
+          return {
+            end: (cumulativeDistances[i] + t*dd) / totalDistance,
+            y: p0[1] + (p1[1] - p0[1])*t,
+          };
+        });
+        let endS = createSignal(() => dataS().end);
         let line = createRef();
         view.add(
             <Line
@@ -79,20 +101,17 @@ export default makeScene2D(function* (view) {
             />,
         );
         let maxTextWidth = 1000;
-        // FIXME(strager): points[iS()] breaks with bol_linear with large
-        // indexes.
         view.add(<Txt
             text={seriesName}
             textAlign="left"
             minWidth={maxTextWidth}
             fill="#e13238"
-            x={createSignal(() => points[iS()][0] + maxTextWidth/2)}
-            y={createSignal(() => points[iS()][1])}
+            x={createSignal(() => xS() + maxTextWidth/2)}
+            y={createSignal(() => dataS().y)}
             width={500}
         />);
     }
-    for (; iS() < xs.length - 1; iS(iS() + 1)) {
-        // FIXME(strager): This still causes jitter.
-        yield *waitFor((xs[iS() + 1] - xs[iS()]) / 400);
+    for (; xS() < maxX; xS(xS() + 1)) {
+        yield *waitFor(1 / 60);
     }
 });
