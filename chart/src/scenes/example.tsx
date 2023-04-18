@@ -24,6 +24,10 @@ export default makeScene2D(function* (view) {
         return sample.text_bytes / 30000;
     }
 
+    function getY(sample) {
+      return -sample.comparisons;
+    }
+
     let maxX = 0;
     let serieses = new Map();
     for (let sample of data) {
@@ -42,7 +46,7 @@ export default makeScene2D(function* (view) {
     let xS = createSignal(0);
     for (let seriesName of serieses.keys()) {
         let seriesSamples = serieses.get(seriesName);
-        let points = seriesSamples.map((sample) => [getX(sample), -sample.comparisons]);
+        let points = seriesSamples.map((sample) => [getX(sample), getY(sample)]);
         points.sort((a, b) => {
             if (a[0] < b[0]) return -1;
             if (a[0] > b[0]) return +1;
