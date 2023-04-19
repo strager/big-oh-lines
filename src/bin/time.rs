@@ -6,11 +6,22 @@ use std::io::Write;
 static mut NEED_COMMA: bool = false;
 
 pub fn main() {
+    let Some(scenario_name): Option<String> = std::env::args().nth(1) else {
+        eprintln!("error: need scenario name");
+        std::process::exit(1);
+    };
+
     let mut out: std::io::BufWriter<std::io::Stdout> = std::io::BufWriter::new(std::io::stdout());
     write!(out, "[\n");
 
     let imps: Vec<Implementation> = load_implementations();
-    linear_time_0(&mut out, &imps);
+    match scenario_name.as_str() {
+        "linear_time_0" => { linear_time_0(&mut out, &imps); }
+        "linear_time_0_len" => { linear_time_0_len(&mut out, &imps); }
+        _ => {
+            eprintln!("error: unknown scenario: {scenario_name}");
+        }
+    }
 
     write!(out, "]\n");
     out.flush();
@@ -34,6 +45,32 @@ pub fn linear_time_0(out: &mut impl Write, imps: &[Implementation]) {
                 offsets.len(),
             ),
                 &text, &offsets, &imp);
+        }
+    }
+}
+
+pub fn linear_time_0_len(out: &mut impl Write, imps: &[Implementation]) {
+    let mut line_counts: Vec<usize> = 
+        geomspace(1.0, 3_000.0, 10000).map(|raw_line_count: f64| raw_line_count as usize)
+    .collect();
+    line_counts.dedup();
+
+    let imp: &Implementation = imps.iter().filter(|imp| imp.name == "bol_linear").next().unwrap();
+    for line_count in line_counts {
+        let text: Vec<u8> = generate_realisticish_text(line_count);
+        for (lookup_type, offsets) in [
+            ("at beginning", &[0usize; 50][..]),
+            ("at end", &[text.len()-1; 50][..]),
+        ] {
+            for _ in 0..5 {
+                test(out, &format!(
+                    "\"text_type\": \"realisticish\",\n\"text_lines\": {},\n\"text_bytes\": {},\n\"lookup_type\": \"{lookup_type}\",\n\"lookups\": {}",
+                    count_lines(&text),
+                    text.len(),
+                    offsets.len(),
+                ),
+                    &text, &offsets, &imp);
+            }
         }
     }
 }
