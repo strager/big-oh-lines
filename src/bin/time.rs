@@ -9,9 +9,9 @@ pub fn main() {
     let mut out: std::io::BufWriter<std::io::Stdout> = std::io::BufWriter::new(std::io::stdout());
     write!(out, "[\n");
 
-    let mut line_counts: Vec<usize> = (1..1000).chain(
-        geomspace(1_000.0, 1_000_000.0, 100).map(|raw_line_count: f64| raw_line_count as usize)
-    ).collect();
+    let mut line_counts: Vec<usize> = 
+        geomspace(1.0, 3_000.0, 1000).map(|raw_line_count: f64| raw_line_count as usize)
+    .collect();
     line_counts.dedup();
 
     let imps: Vec<Implementation> = load_implementations();
