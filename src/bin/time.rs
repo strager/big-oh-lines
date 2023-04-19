@@ -9,40 +9,33 @@ pub fn main() {
     let mut out: std::io::BufWriter<std::io::Stdout> = std::io::BufWriter::new(std::io::stdout());
     write!(out, "[\n");
 
+    let imps: Vec<Implementation> = load_implementations();
+    linear_time_0(&mut out, &imps);
+
+    write!(out, "]\n");
+    out.flush();
+}
+
+pub fn linear_time_0(out: &mut impl Write, imps: &[Implementation]) {
     let mut line_counts: Vec<usize> = 
         geomspace(1.0, 3_000.0, 1000).map(|raw_line_count: f64| raw_line_count as usize)
     .collect();
     line_counts.dedup();
 
-    let imps: Vec<Implementation> = load_implementations();
+    let imp: &Implementation = imps.iter().filter(|imp| imp.name == "bol_linear").next().unwrap();
     for line_count in line_counts {
-        for (text_type, text) in [
-            ("realisticish", generate_realisticish_text(line_count)),
-        ] {
-            for (lookup_type, offsets) in [
-                ("at beginning", &[0usize; 50][..]),
-            ] {
-                for imp in &imps {
-                    if imp.name == "bol_linear" {
-                        for _ in 0..5 {
-                            test(&mut out, &format!(
-                                "\"text_type\": \"{}\",\n\"text_lines\": {},\n\"text_bytes\": {},\n\"lookup_type\": \"{}\",\n\"lookups\": {}",
-                                text_type,
-                                count_lines(&text),
-                                text.len(),
-                                lookup_type,
-                                offsets.len(),
-                            ),
-                                &text, &offsets, &imp);
-                        }
-                    }
-                }
-            }
+        let text: Vec<u8> = generate_realisticish_text(line_count);
+        let offsets: &[usize] = &[0usize; 50][..];
+        for _ in 0..5 {
+            test(out, &format!(
+                "\"text_type\": \"realisticish\",\n\"text_lines\": {},\n\"text_bytes\": {},\n\"lookup_type\": \"at beginning\",\n\"lookups\": {}",
+                count_lines(&text),
+                text.len(),
+                offsets.len(),
+            ),
+                &text, &offsets, &imp);
         }
     }
-
-    write!(out, "]\n");
-    out.flush();
 }
 
 fn test(out: &mut impl Write, metadata_json: &str, text: &[u8], offsets: &[usize], imp: &Implementation) {
