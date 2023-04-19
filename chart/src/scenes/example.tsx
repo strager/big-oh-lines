@@ -11,17 +11,6 @@ import {linear} from '@motion-canvas/core/lib/tweening';
 import {makeScene2D} from '@motion-canvas/2d/lib/scenes';
 import {waitFor} from '@motion-canvas/core/lib/flow';
 
-let serieses = new Map();
-for (let sample of data) {
-    let key = `${sample.imp},${sample.lookup_type},${sample.text_type}`;
-    let seriesSamples = serieses.get(key);
-    if (seriesSamples === undefined) {
-        seriesSamples = [];
-        serieses.set(key, seriesSamples);
-    }
-    seriesSamples.push(sample);
-}
-
 export default makeScene2D(function* (view) {
     function getX(sample) {
         return sample.text_bytes / 30000;
