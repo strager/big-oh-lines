@@ -22,17 +22,10 @@ export default makeScene2D(function* (view) {
 
     let maxX = 0;
     let serieses = new Map();
-    for (let sample of data) {
-        if (!(sample.lookup_type === 'near beginning' && sample.text_type === 'realisticish')) {
-            continue;
-        }
-        let seriesSamples = serieses.get(sample.imp);
-        if (seriesSamples === undefined) {
-            seriesSamples = [];
-            serieses.set(sample.imp, seriesSamples);
-        }
-        seriesSamples.push(sample);
-        maxX = Math.max(maxX, getX(sample));
+    for (let imp of ['bol_linear', 'bol_table', 'bol_btree', 'bol_bsearch']) {
+      let samples = getSeriesSamples({lookupType: 'near beginning', textType: 'realisticish', imp: imp});
+      serieses.set(imp, samples);
+      maxX = Math.max(maxX, ...samples.map((sample) => getX(sample)));
     }
 
     let xS = createSignal(0);
@@ -50,6 +43,10 @@ export default makeScene2D(function* (view) {
         yield *waitFor(1 / 60);
     }
 });
+
+function getSeriesSamples({lookupType, textType, imp}) {
+  return data.filter((sample) => sample.lookup_type === lookupType && sample.text_type === textType && sample.imp === imp);
+}
 
 interface ChartSeriesProps<Sample> extends NodeProps {
   getX: SignalValue<(sample: Sample) => number>;
