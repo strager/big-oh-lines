@@ -32,9 +32,7 @@ export default makeScene2D(function* (view) {
     for (let seriesName of serieses.keys()) {
         let seriesSamples = serieses.get(seriesName);
         view.add(<ChartSeries
-          getX={getX}
-          getY={getY}
-          samples={seriesSamples}
+          points={seriesSamples.map((sample) => [getX(sample), getY(sample)])}
           xProgress={xS}
           label={seriesName}
         />);
@@ -49,20 +47,14 @@ function getSeriesSamples({lookupType, textType, imp}) {
 }
 
 interface ChartSeriesProps<Sample> extends NodeProps {
-  getX: SignalValue<(sample: Sample) => number>;
-  getY: SignalValue<(sample: Sample) => number>;
-  samples: SignalValue<Sample[]>;
+  points: SignalValue<[number, number][]>;
   xProgress: SignalValue<number>;
   label: SignalValue<string>;
 }
 
 class ChartSeries<Sample> extends Node {
   @signal()
-  public declare readonly getX: SimpleSignal<(sample: Sample) => number, this>;
-  @signal()
-  public declare readonly getY: SimpleSignal<(sample: Sample) => number, this>;
-  @signal()
-  public declare readonly samples: SimpleSignal<Sample[], this>;
+  public declare readonly points: SimpleSignal<[number, number][], this>;
   @signal()
   public declare readonly xProgress: SimpleSignal<number, this>;
   @signal()
@@ -72,7 +64,7 @@ class ChartSeries<Sample> extends Node {
     let {getX, getY} = props;
     super({...props});
 
-    let points = this.samples().map((sample) => [getX(sample), getY(sample)]);
+    let points = [...props.points];
     points.sort((a, b) => {
         if (a[0] < b[0]) return -1;
         if (a[0] > b[0]) return +1;
