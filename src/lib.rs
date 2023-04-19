@@ -428,3 +428,31 @@ pub fn generate_normal_offsets(text: &[u8], count: usize, mean: usize, std_dev: 
         })
         .collect::<Vec<usize>>()
 }
+
+// Like numpy's np.geomspace.
+pub fn geomspace(start: f64, stop: f64, count: usize) -> impl Iterator<Item=f64> {
+    logspace(start.log10(), stop.log10(), count)
+}
+
+// Like numpy's np.logspace.
+pub fn logspace(start: f64, stop: f64, count: usize) -> impl Iterator<Item=f64> {
+    let base: f64 = 10.0;
+    (0..count)
+        .map(move |i: usize| ((i as f64) / ((count-1) as f64)) * (stop-start) + start)
+        .map(move |i: f64| base.powf(i))
+}
+
+pub fn count_lines(text: &[u8]) -> usize {
+    text.iter().filter(|c: &&u8| **c == b'\n').count() + 1
+}
+
+#[cfg(test)]
+mod test {
+    use crate::*;
+
+    #[test]
+    fn test_geomspace() {
+        assert_eq!(geomspace(1.0f64, 100.0f64, 3).collect::<Vec<f64>>(), vec![1.0f64, 10.0f64, 100.0f64]);
+        assert_eq!(geomspace(1.0f64, 1000.0f64, 4).collect::<Vec<f64>>(), vec![1.0f64, 10.0f64, 100.0f64, 1000.0f64]);
+    }
+}

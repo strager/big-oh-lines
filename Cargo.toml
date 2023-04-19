@@ -35,13 +35,17 @@ rand_pcg = { workspace = true }
 name = "stats"
 required-features = ["bol_stats"]
 
+[[bin]]
+name = "time"
+required-features = []
+
 [[bench]]
 name = "bench"
 harness = false
 
 [lib]
 doctest = false
-test = false
+test = true
 
 [features]
 default = []
