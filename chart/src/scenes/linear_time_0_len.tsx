@@ -21,13 +21,20 @@ export default makeScene2D(function* (view) {
     let chartWidth = 1550;
     let chartHeight = 850;
 
+    let xTicks = [
+      [100 * 1024, '100 KiB'],
+    ];
+
     let minSamples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at beginning'));
     let maxSamples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at end'));
 
     let maxSampleX = Math.max(...data.map((sample) => sample.text_bytes));
+    let maxTickX = Math.max(...xTicks.map(([sampleX, _label]) => sampleX));
+    let xSampleToScreen = chartWidth / Math.max(maxSampleX, maxTickX);
     function getX(sample) {
-        return chartWidth * sample.text_bytes / maxSampleX;
+        return xSampleToScreen * sample.text_bytes;
     }
+    let maxX = chartWidth * maxSampleX / Math.max(maxSampleX, maxTickX);
 
     let maxSampleY = Math.max(...data.map((sample) => sample.duration_ns));
     function getY(sample) {
@@ -45,6 +52,7 @@ export default makeScene2D(function* (view) {
         position={chartPosition2}
         progress={axisProgressS}
         length={chartWidth + 100}
+        ticks={xTicks.map(([sampleX, label]) => [sampleX * xSampleToScreen, label])}
         label="file size"
       />
       <ChartYAxis
@@ -89,7 +97,7 @@ export default makeScene2D(function* (view) {
     yield *waitUntil('show data');
     let progressDuration = 8;
     for (let i = 0; i < progressDuration * fps; ++i) {
-      xS(chartWidth * ease.easeInOutExpo(i / (progressDuration * fps)));
+      xS(maxX * ease.easeInOutExpo(i / (progressDuration * fps)));
       yield *waitFor(1 / fps);
     }
 });

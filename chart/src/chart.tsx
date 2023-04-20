@@ -111,6 +111,7 @@ interface ChartXAxisProps extends NodeProps {
   length: SignalValue<number>;
   progress: SignalValue<number>;
   label: SignalValue<string>;
+  ticks?: SignalValue<[number, string][]>;
 }
 
 export class ChartXAxis extends Node {
@@ -120,6 +121,9 @@ export class ChartXAxis extends Node {
   public declare readonly progress: SimpleSignal<number, this>;
   @signal()
   public declare readonly label: SimpleSignal<string, this>;
+  @initial([])
+  @signal()
+  public declare readonly ticks: SimpleSignal<[number, string][], this>;
 
   public constructor(props?: CharXAxisProps) {
     super({...props});
@@ -140,6 +144,22 @@ export class ChartXAxis extends Node {
         points={createSignal(() => [[0, 0], [this.length(), 0]])}
         stroke="#bbb"
     />);
+
+    for (let [tickX, tickLabel] of this.ticks()) {
+      console.log(tickX);
+      this.add(<Line
+          lineWidth={2}
+          points={[[tickX, 10], [tickX, -10]]}
+          stroke="#bbb"
+      />);
+      this.add(<Txt
+          text={tickLabel}
+          textAlign="left"
+          fill="#bbb"
+          x={tickX}
+          y={40}
+      />);
+    }
   }
 }
 
