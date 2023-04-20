@@ -10,6 +10,37 @@ import {linear} from '@motion-canvas/core/lib/tweening';
 import {makeScene2D} from '@motion-canvas/2d/lib/scenes';
 import {waitFor} from '@motion-canvas/core/lib/flow';
 
+export function computeChartStuff(view) {
+    let viewWidth = view.width();
+    let viewHeight = view.height();
+    let center = [-viewWidth/2, viewHeight/2];
+
+    let chartOuterPadding = {top: 50, bottom: 100, left: 100, right: 50};
+    let chartInnerPadding = {top: 50, right: 100};
+    let chartWidth = viewWidth - (chartOuterPadding.left + chartOuterPadding.right + chartInnerPadding.right);
+    let chartHeight = viewHeight - (chartOuterPadding.top + chartOuterPadding.bottom + chartInnerPadding.top);
+    let chartPosition = [chartOuterPadding.left, -chartOuterPadding.bottom];
+
+    let fps = 60;
+
+    return {chartWidth, chartHeight, chartPosition, chartInnerPadding, chartOuterPadding, center, fps};
+}
+
+export function mergeSamplesMin(rawSamples) {
+  let samples = [];
+  for (let sample of rawSamples) {
+    if (samples.length > 0 && samples.at(-1).text_bytes === sample.text_bytes) {
+      // Pick the lowest sample at a given text_bytes.
+      if (sample.duration_ns < samples.at(-1).duration_ns) {
+        samples[samples.length - 1] = sample;
+      }
+    } else {
+      samples.push(sample)
+    }
+  }
+  return samples;
+}
+
 interface ChartSeriesProps extends NodeProps {
   points: SignalValue<[number, number][]>;
   xProgress: SignalValue<number>;

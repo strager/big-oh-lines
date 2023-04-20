@@ -11,18 +11,10 @@ import {linear} from '@motion-canvas/core/lib/tweening';
 import * as ease from '@motion-canvas/core/lib/tweening';
 import {makeScene2D} from '@motion-canvas/2d/lib/scenes';
 import {waitFor, waitUntil} from '@motion-canvas/core/lib/flow';
-import {ChartSeries, ChartXAxis, ChartYAxis} from '../chart.tsx';
+import {ChartSeries, ChartXAxis, ChartYAxis, computeChartStuff, mergeSamplesMin} from '../chart.tsx';
 
 export default makeScene2D(function* (view) {
-    let viewWidth = view.width();
-    let viewHeight = view.height();
-    let center = [-viewWidth/2, viewHeight/2];
-
-    let chartOuterPadding = {top: 50, bottom: 100, left: 100, right: 50};
-    let chartInnerPadding = {top: 50, right: 100};
-    let chartWidth = viewWidth - (chartOuterPadding.left + chartOuterPadding.right + chartInnerPadding.right);
-    let chartHeight = viewHeight - (chartOuterPadding.top + chartOuterPadding.bottom + chartInnerPadding.top);
-    let chartPosition = [chartOuterPadding.left, -chartOuterPadding.bottom];
+    let {chartWidth, chartHeight, chartPosition, chartInnerPadding, chartOuterPadding, center, fps} = computeChartStuff(view);
 
     let xTicks = [
       [100 * 1024, '100 KiB'],
@@ -80,7 +72,6 @@ export default makeScene2D(function* (view) {
       />
     </Node>);
 
-    let fps = 60;
     let axisProgressDuration = 0.5;
     for (let i = 0; i < axisProgressDuration * fps; ++i) {
       axisProgressS(ease.easeInOutCirc(i / (axisProgressDuration * fps)));
@@ -101,18 +92,3 @@ export default makeScene2D(function* (view) {
       yield *waitFor(1 / fps);
     }
 });
-
-function mergeSamplesMin(rawSamples) {
-  let samples = [];
-  for (let sample of rawSamples) {
-    if (samples.length > 0 && samples.at(-1).text_bytes === sample.text_bytes) {
-      // Pick the lowest sample at a given text_bytes.
-      if (sample.duration_ns < samples.at(-1).duration_ns) {
-        samples[samples.length - 1] = sample;
-      }
-    } else {
-      samples.push(sample)
-    }
-  }
-  return samples;
-}
