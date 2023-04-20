@@ -97,7 +97,7 @@ export default makeScene2D(function* (view) {
     yield *waitUntil('show data');
     let progressDuration = 8;
     for (let i = 0; i < progressDuration * fps; ++i) {
-      xS(maxX * ease.easeInOutExpo(i / (progressDuration * fps)));
+      xS(maxX * ease.easeInOutQuint(i / (progressDuration * fps)));
       yield *waitFor(1 / fps);
     }
 });

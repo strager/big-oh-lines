@@ -146,7 +146,6 @@ export class ChartXAxis extends Node {
     />);
 
     for (let [tickX, tickLabel] of this.ticks()) {
-      console.log(tickX);
       this.add(<Line
           lineWidth={2}
           points={[[tickX, 10], [tickX, -10]]}
