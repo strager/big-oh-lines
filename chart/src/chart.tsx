@@ -90,7 +90,7 @@ export class ChartSeries<Sample> extends Node {
         minWidth={maxTextWidth}
         fill="#e13238"
         x={createSignal(() => this.xProgress() + maxTextWidth/2)}
-        y={createSignal(() => dataS().y)}
+        y={createSignal(() => Math.min(dataS().y, -20))}
         width={500}
     />);
   }
@@ -116,7 +116,7 @@ export class ChartXAxis extends Node {
     this.add(<Txt
         text={this.label}
         textAlign="left"
-        fill="#e13238"
+        fill="#bbb"
         x={createSignal(() => this.length()/2)}
         y={40}
     />);
@@ -127,7 +127,7 @@ export class ChartXAxis extends Node {
         lineWidth={2}
         end={this.progress}
         points={createSignal(() => [[0, 0], [this.length(), 0]])}
-        stroke="#e13238"
+        stroke="#bbb"
     />);
   }
 }
@@ -152,7 +152,7 @@ export class ChartYAxis extends Node {
     this.add(<Txt
         text={this.label}
         textAlign="left"
-        fill="#e13238"
+        fill="#bbb"
         rotation={-90}
         x={-40}
         y={createSignal(() => -this.length()/2)}
@@ -164,7 +164,7 @@ export class ChartYAxis extends Node {
         lineWidth={2}
         end={this.progress}
         points={createSignal(() => [[0, 0], [0, -this.length()]])}
-        stroke="#e13238"
+        stroke="#bbb"
     />);
   }
 }

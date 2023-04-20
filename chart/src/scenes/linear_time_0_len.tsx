@@ -61,15 +61,17 @@ export default makeScene2D(function* (view) {
       />
     </Node>);
 
-    let axisProgressDuration = 0.5;
     let fps = 60;
+    let axisProgressDuration = 0.5;
     for (let i = 0; i < axisProgressDuration * fps; ++i) {
       axisProgressS(i / (axisProgressDuration * fps));
       yield *waitFor(1 / fps);
     }
 
-    for (; xS() < maxX; xS(xS() + 1)) {
-        yield *waitFor(1 / fps);
+    let progressDuration = 8;
+    for (let i = 0; i < progressDuration * fps; ++i) {
+      xS((maxX * i) / (progressDuration * fps));
+      yield *waitFor(1 / fps);
     }
 });
 
