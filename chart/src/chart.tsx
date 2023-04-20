@@ -12,6 +12,15 @@ import {waitFor} from '@motion-canvas/core/lib/flow';
 
 let font = 'Comic Sans MS';
 
+export let colors = {
+    green: 'rgb(112, 173, 71)',
+    orange: 'rgb(237, 125, 49)',
+    yellow: 'rgb(255, 192, 0)',
+    blue: 'rgb(91, 155, 132)',
+    light_green: 'rgb(168, 208, 141)',
+    light_orange: 'rgb(244, 177, 131)',
+};
+
 export function computeChartStuff(view) {
     let viewWidth = view.width();
     let viewHeight = view.height();

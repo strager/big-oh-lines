@@ -11,7 +11,7 @@ import {linear} from '@motion-canvas/core/lib/tweening';
 import * as ease from '@motion-canvas/core/lib/tweening';
 import {makeScene2D} from '@motion-canvas/2d/lib/scenes';
 import {waitFor, waitUntil} from '@motion-canvas/core/lib/flow';
-import {ChartSeries, ChartXAxis, ChartYAxis, computeChartStuff, mergeSamplesMin} from '../chart.tsx';
+import {ChartSeries, ChartXAxis, ChartYAxis, computeChartStuff, mergeSamplesMin, colors} from '../chart.tsx';
 import {ValueDispatcher} from '@motion-canvas/core/lib/events';
 
 let minSamples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at beginning'));
@@ -75,7 +75,7 @@ function* generateScene(name, view) {
         labelMaxY={name === 'linear_time_0_len.gotcha' ? -167 : -20}
         labelMinY={name === 'linear_time_0_len.gotcha' ? -167 : -20}
         label={'best case'}
-        color={'#00ff00'}
+        color={colors.green}
       />
       {name !== 'linear_time_0_len.gotcha' &&
         <ChartSeries
@@ -85,7 +85,7 @@ function* generateScene(name, view) {
           labelProgress={labelProgressS}
           label={'worst case'}
           labelMinY={-60}
-          color={'#ff0000'}
+          color={colors.orange}
         />}
     </Node>);
 
