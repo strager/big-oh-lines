@@ -74,7 +74,7 @@ function* generateScene(name, view) {
         labelProgress={labelProgressS}
         labelMaxY={name === 'linear_time_0_len.gotcha' ? -167 : -20}
         labelMinY={name === 'linear_time_0_len.gotcha' ? -167 : -20}
-        label={'best case'}
+        label={name === 'linear_time_0_len.gotcha' ? '' : 'best case'}
         color={colors.green}
       />
       {name !== 'linear_time_0_len.gotcha' &&
