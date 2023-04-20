@@ -134,6 +134,7 @@ export class ChartXAxis extends Node {
         fill="#bbb"
         x={createSignal(() => this.length()/2)}
         y={40}
+        opacity={this.progress}
     />);
 
     this.add(<Line
@@ -150,6 +151,7 @@ export class ChartXAxis extends Node {
           lineWidth={2}
           points={[[tickX, 10], [tickX, -10]]}
           stroke="#bbb"
+          opacity={createSignal(() => this.length() * this.progress() >= tickX ? 1 : 0)}
       />);
       this.add(<Txt
           text={tickLabel}
@@ -157,6 +159,7 @@ export class ChartXAxis extends Node {
           fill="#bbb"
           x={tickX}
           y={40}
+          opacity={this.progress}
       />);
     }
   }
@@ -186,6 +189,7 @@ export class ChartYAxis extends Node {
         rotation={-90}
         x={-40}
         y={createSignal(() => -this.length()/2)}
+        opacity={this.progress}
     />);
 
     this.add(<Line
