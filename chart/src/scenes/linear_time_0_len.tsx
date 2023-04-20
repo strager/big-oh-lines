@@ -12,8 +12,16 @@ import * as ease from '@motion-canvas/core/lib/tweening';
 import {makeScene2D} from '@motion-canvas/2d/lib/scenes';
 import {waitFor, waitUntil} from '@motion-canvas/core/lib/flow';
 import {ChartSeries, ChartXAxis, ChartYAxis, computeChartStuff, mergeSamplesMin} from '../chart.tsx';
+import {ValueDispatcher} from '@motion-canvas/core/lib/events';
 
-export default makeScene2D(function* (view) {
+function makeSubscene(name) {
+  let scene = makeScene2D(function (view) { return generateScene(name, view); });
+  scene.name = name;
+  scene.onReplaced ??= new ValueDispatcher(scene.config);
+  return scene;
+}
+
+function* generateScene(name, view) {
     let {chartWidth, chartHeight, chartPosition, chartInnerPadding, chartOuterPadding, center, fps} = computeChartStuff(view);
 
     let xTicks = [
@@ -72,23 +80,29 @@ export default makeScene2D(function* (view) {
       />
     </Node>);
 
-    let axisProgressDuration = 0.5;
-    for (let i = 0; i < axisProgressDuration * fps; ++i) {
-      axisProgressS(ease.easeInOutCirc(i / (axisProgressDuration * fps)));
-      yield *waitFor(1 / fps);
-    }
+    yield *waitFor(1 / fps);
 
-    yield *waitUntil('show labels');
-    let labelsDuration = 0.5;
-    for (let i = 0; i < labelsDuration * fps; ++i) {
-      labelProgressS(ease.easeInOutCirc(i / (labelsDuration * fps)));
-      yield *waitFor(1 / fps);
+    if (name === 'linear_time_0_len.axes') {
+      let axisProgressDuration = 0.5;
+      for (let i = 0; i < axisProgressDuration * fps; ++i) {
+        axisProgressS(ease.easeInOutCirc(i / (axisProgressDuration * fps)));
+        yield *waitFor(1 / fps);
+      }
     }
+    axisProgressS(1);
 
-    yield *waitUntil('show data');
-    let progressDuration = 4;
-    for (let i = 0; i < progressDuration * fps; ++i) {
-      xS(maxX * ease.easeInOutQuint(i / (progressDuration * fps)));
-      yield *waitFor(1 / fps);
+    labelProgressS(1);
+
+    if (name == 'linear_time_0_len.data') {
+      let progressDuration = 4;
+      for (let i = 0; i < progressDuration * fps; ++i) {
+        xS(maxX * ease.easeInOutQuint(i / (progressDuration * fps)));
+        yield *waitFor(1 / fps);
+      }
     }
-});
+}
+
+export let scenes = [
+  makeSubscene('linear_time_0_len.axes'),
+  makeSubscene('linear_time_0_len.data'),
+];

@@ -1,6 +1,14 @@
     $ yarn install
     $ yarn run serve
 
-After exporting:
+## exporting
 
-    $ ./chart/encode.sh linear_time_0_len
+    $ # delete old .webp files:
+    $ rm -rf chart/output/project/*/
+
+Then export using Motion Canvas's UI.
+
+Then create .mp4 files:
+
+    $ ./chart/encode.sh linear_time_0_len.axes
+    $ ./chart/encode.sh linear_time_0_len.data
