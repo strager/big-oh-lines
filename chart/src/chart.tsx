@@ -106,6 +106,12 @@ export class ChartSeries extends Node {
         };
       }
       let p0 = points[i];
+      if (x < p0[0]) {
+        return {
+          end: 0,
+          y: p0[1],
+        };
+      }
       let p1 = points[i + 1];
       let t = (x - p0[0]) / (p1[0] - p0[0]);
       let dd = cumulativeDistances[i+1] - cumulativeDistances[i];
