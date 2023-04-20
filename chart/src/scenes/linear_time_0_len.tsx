@@ -18,17 +18,21 @@ export default makeScene2D(function* (view) {
     let viewHeight = view.height();
     let center = [-viewWidth/2, viewHeight/2];
 
-    function getX(sample) {
-        return sample.text_bytes / 50;
-    }
+    let chartWidth = 1550;
+    let chartHeight = 850;
 
-    function getY(sample) {
-      return -sample.duration_ns / 1000;
-    }
-
-    let maxX = Math.max(...data.map((sample) => getX(sample)));
     let minSamples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at beginning'));
     let maxSamples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at end'));
+
+    let maxSampleX = Math.max(...data.map((sample) => sample.text_bytes));
+    function getX(sample) {
+        return chartWidth * sample.text_bytes / maxSampleX;
+    }
+
+    let maxSampleY = Math.max(...data.map((sample) => sample.duration_ns));
+    function getY(sample) {
+      return -(chartHeight * sample.duration_ns / maxSampleY);
+    }
 
     let chartPosition = [100, -100];
     let chartPosition2 = [100, -100];
@@ -40,13 +44,13 @@ export default makeScene2D(function* (view) {
       <ChartXAxis
         position={chartPosition2}
         progress={axisProgressS}
-        length={1800}
+        length={chartWidth + 100}
         label="file size"
       />
       <ChartYAxis
         position={chartPosition2}
         progress={axisProgressS}
-        length={1000}
+        length={chartHeight + 100}
         label="line number lookup time"
       />
       <ChartSeries
@@ -85,7 +89,7 @@ export default makeScene2D(function* (view) {
     yield *waitUntil('show data');
     let progressDuration = 8;
     for (let i = 0; i < progressDuration * fps; ++i) {
-      xS(maxX * ease.easeInOutExpo(i / (progressDuration * fps)));
+      xS(chartWidth * ease.easeInOutExpo(i / (progressDuration * fps)));
       yield *waitFor(1 / fps);
     }
 });
