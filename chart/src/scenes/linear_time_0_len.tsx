@@ -8,6 +8,7 @@ import {signal} from '@motion-canvas/2d/lib/decorators';
 import {createSignal} from '@motion-canvas/core/lib/signals';
 import type {SignalValue} from '@motion-canvas/core/lib/signals';
 import {linear} from '@motion-canvas/core/lib/tweening';
+import * as ease from '@motion-canvas/core/lib/tweening';
 import {makeScene2D} from '@motion-canvas/2d/lib/scenes';
 import {waitFor} from '@motion-canvas/core/lib/flow';
 import {ChartSeries, ChartXAxis, ChartYAxis} from '../chart.tsx';
@@ -70,7 +71,7 @@ export default makeScene2D(function* (view) {
 
     let progressDuration = 8;
     for (let i = 0; i < progressDuration * fps; ++i) {
-      xS((maxX * i) / (progressDuration * fps));
+      xS(maxX * ease.easeInOutExpo(i / (progressDuration * fps)));
       yield *waitFor(1 / fps);
     }
 });
