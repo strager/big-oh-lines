@@ -47,6 +47,7 @@ interface ChartSeriesProps extends NodeProps {
   label: SignalValue<string>;
   labelProgress: SignalValue<number>;
   labelMinY?: SignalValue<number>;
+  labelMaxY?: SignalValue<number>;
   color: SignalValue<PossibleColor>;
 }
 
@@ -62,6 +63,9 @@ export class ChartSeries extends Node {
   @initial(-20)
   @signal()
   public declare readonly labelMinY: SimpleSignal<number, this>;
+  @initial(-99999)
+  @signal()
+  public declare readonly labelMaxY: SimpleSignal<number, this>;
   @colorSignal()
   public declare readonly color: ColorSignal<this>;
 
@@ -137,7 +141,7 @@ export class ChartSeries extends Node {
         minWidth={maxTextWidth}
         fill={this.color}
         x={createSignal(() => this.xProgress() + maxTextWidth/2)}
-        y={createSignal(() => Math.min(dataS().y, this.labelMinY()))}
+        y={createSignal(() => Math.max(Math.min(dataS().y, this.labelMinY()), this.labelMaxY()))}
         width={500}
         opacity={this.labelProgress}
     />);

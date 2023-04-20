@@ -72,6 +72,8 @@ function* generateScene(name, view) {
         points={minSamples.map((sample) => [getX(sample), getY(sample)])}
         xProgress={xS}
         labelProgress={labelProgressS}
+        labelMaxY={name === 'linear_time_0_len.gotcha' ? -167 : -20}
+        labelMinY={name === 'linear_time_0_len.gotcha' ? -167 : -20}
         label={'best case'}
         color={'#00ff00'}
       />
