@@ -14,6 +14,12 @@ import {waitFor, waitUntil} from '@motion-canvas/core/lib/flow';
 import {ChartSeries, ChartXAxis, ChartYAxis, computeChartStuff, mergeSamplesMin} from '../chart.tsx';
 import {ValueDispatcher} from '@motion-canvas/core/lib/events';
 
+let minSamples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at beginning'));
+let maxSamples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at end'));
+
+let maxSampleY = Math.max(...data.map((sample) => sample.duration_ns));
+let maxGotchaSampleY = Math.max(...data.filter((sample) => sample.lookup_type === 'at beginning').map((sample) => sample.duration_ns));
+
 function makeSubscene(name) {
   let scene = makeScene2D(function (view) { return generateScene(name, view); });
   scene.name = name;
@@ -28,9 +34,6 @@ function* generateScene(name, view) {
       [100 * 1024, '100 KiB'],
     ];
 
-    let minSamples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at beginning'));
-    let maxSamples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at end'));
-
     let maxSampleX = Math.max(...data.map((sample) => sample.text_bytes));
     let maxTickX = Math.max(...xTicks.map(([sampleX, _label]) => sampleX));
     let xSampleToScreen = chartWidth / Math.max(maxSampleX, maxTickX);
@@ -39,10 +42,13 @@ function* generateScene(name, view) {
     }
     let maxX = chartWidth * maxSampleX / Math.max(maxSampleX, maxTickX);
 
-    let maxSampleY = Math.max(...data.map((sample) => sample.duration_ns));
-    function getY(sample) {
+    function getYGotcha(sample) {
+      return -(chartHeight * sample.duration_ns / maxGotchaSampleY);
+    }
+    function getYNormal(sample) {
       return -(chartHeight * sample.duration_ns / maxSampleY);
     }
+    let getY = name === 'linear_time_0_len.gotcha' ? getYGotcha : getYNormal;
 
     let labelProgressS = createSignal(0);
     let axisProgressS = createSignal(0);
@@ -69,15 +75,16 @@ function* generateScene(name, view) {
         label={'best case'}
         color={'#00ff00'}
       />
-      <ChartSeries
-        position={chartPosition}
-        points={maxSamples.map((sample) => [getX(sample), getY(sample)])}
-        xProgress={xS}
-        labelProgress={labelProgressS}
-        label={'worst case'}
-        labelMinY={-60}
-        color={'#ff0000'}
-      />
+      {name !== 'linear_time_0_len.gotcha' &&
+        <ChartSeries
+          position={chartPosition}
+          points={maxSamples.map((sample) => [getX(sample), getY(sample)])}
+          xProgress={xS}
+          labelProgress={labelProgressS}
+          label={'worst case'}
+          labelMinY={-60}
+          color={'#ff0000'}
+        />}
     </Node>);
 
     yield *waitFor(1 / fps);
@@ -93,7 +100,7 @@ function* generateScene(name, view) {
 
     labelProgressS(1);
 
-    if (name == 'linear_time_0_len.data') {
+    if (name === 'linear_time_0_len.data' || name === 'linear_time_0_len.gotcha') {
       let progressDuration = 4;
       for (let i = 0; i < progressDuration * fps; ++i) {
         xS(maxX * ease.easeInOutQuint(i / (progressDuration * fps)));
@@ -104,5 +111,6 @@ function* generateScene(name, view) {
 
 export let scenes = [
   makeSubscene('linear_time_0_len.axes'),
+  makeSubscene('linear_time_0_len.gotcha'),
   makeSubscene('linear_time_0_len.data'),
 ];
