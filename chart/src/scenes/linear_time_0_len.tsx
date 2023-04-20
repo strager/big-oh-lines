@@ -53,12 +53,15 @@ export default makeScene2D(function* (view) {
         points={minSamples.map((sample) => [getX(sample), getY(sample)])}
         xProgress={xS}
         label={'best case'}
+        color={'#00ff00'}
       />
       <ChartSeries
         position={chartPosition}
         points={maxSamples.map((sample) => [getX(sample), getY(sample)])}
         xProgress={xS}
         label={'worst case'}
+        labelMinY={-60}
+        color={'#ff0000'}
       />
     </Node>);
 

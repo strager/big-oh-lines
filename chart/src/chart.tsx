@@ -3,7 +3,7 @@ import {Circle, Line, Txt, Rect, Node} from '@motion-canvas/2d/lib/components';
 import type {NodeProps} from '@motion-canvas/2d/lib/components';
 import {all} from '@motion-canvas/core/lib/flow';
 import {createRef} from '@motion-canvas/core/lib/utils';
-import {signal} from '@motion-canvas/2d/lib/decorators';
+import {initial, signal, colorSignal} from '@motion-canvas/2d/lib/decorators';
 import {createSignal} from '@motion-canvas/core/lib/signals';
 import type {SignalValue} from '@motion-canvas/core/lib/signals';
 import {linear} from '@motion-canvas/core/lib/tweening';
@@ -14,6 +14,8 @@ interface ChartSeriesProps extends NodeProps {
   points: SignalValue<[number, number][]>;
   xProgress: SignalValue<number>;
   label: SignalValue<string>;
+  labelMinY?: SignalValue<number>;
+  color: SignalValue<PossibleColor>;
 }
 
 export class ChartSeries extends Node {
@@ -23,6 +25,11 @@ export class ChartSeries extends Node {
   public declare readonly xProgress: SimpleSignal<number, this>;
   @signal()
   public declare readonly label: SimpleSignal<string, this>;
+  @initial(-20)
+  @signal()
+  public declare readonly labelMinY: SimpleSignal<number, this>;
+  @colorSignal()
+  public declare readonly color: ColorSignal<this>;
 
   public constructor(props?: ChartSeriesProps) {
     let {getX, getY} = props;
@@ -80,7 +87,7 @@ export class ChartSeries extends Node {
         lineWidth={2}
         end={createSignal(() => dataS().end)}
         points={points}
-        stroke="#e13238"
+        stroke={this.color}
     />);
 
     let maxTextWidth = 1000;
@@ -88,9 +95,9 @@ export class ChartSeries extends Node {
         text={createSignal(() => this.xProgress() === 0 ? '' : this.label())}
         textAlign="left"
         minWidth={maxTextWidth}
-        fill="#e13238"
+        fill={this.color}
         x={createSignal(() => this.xProgress() + maxTextWidth/2)}
-        y={createSignal(() => Math.min(dataS().y, -20))}
+        y={createSignal(() => Math.min(dataS().y, this.labelMinY()))}
         width={500}
     />);
   }
