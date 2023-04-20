@@ -103,9 +103,10 @@ function* generateScene(name, view) {
     labelProgressS(1);
 
     if (name === 'linear_time_0_len.data' || name === 'linear_time_0_len.gotcha') {
+      let myEase = name === 'linear_time_0_len.gotcha' ? ease.easeInOutCubic : ease.easeInOutQuint;
       let progressDuration = 4;
       for (let i = 0; i < progressDuration * fps; ++i) {
-        xS(maxX * ease.easeInOutQuint(i / (progressDuration * fps)));
+        xS(maxX * myEase(i / (progressDuration * fps)));
         yield *waitFor(1 / fps);
       }
     }
