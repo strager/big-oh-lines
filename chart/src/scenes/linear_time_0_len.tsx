@@ -10,9 +10,13 @@ import type {SignalValue} from '@motion-canvas/core/lib/signals';
 import {linear} from '@motion-canvas/core/lib/tweening';
 import {makeScene2D} from '@motion-canvas/2d/lib/scenes';
 import {waitFor} from '@motion-canvas/core/lib/flow';
-import {ChartSeries} from '../chart.tsx';
+import {ChartSeries, ChartXAxis, ChartYAxis} from '../chart.tsx';
 
 export default makeScene2D(function* (view) {
+    let viewWidth = view.width();
+    let viewHeight = view.height();
+    let center = [-viewWidth/2, viewHeight/2];
+
     function getX(sample) {
         return sample.text_bytes / 50;
     }
@@ -25,19 +29,47 @@ export default makeScene2D(function* (view) {
     let minSamples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at beginning'));
     let maxSamples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at end'));
 
+    let chartPosition = [100, -100];
+    let chartPosition2 = [100, -100];
+
+    let axisProgressS = createSignal(0);
     let xS = createSignal(0);
-    view.add(<ChartSeries
-      points={minSamples.map((sample) => [getX(sample), getY(sample)])}
-      xProgress={xS}
-      label={'best case'}
-    />);
-    view.add(<ChartSeries
-      points={maxSamples.map((sample) => [getX(sample), getY(sample)])}
-      xProgress={xS}
-      label={'worst case'}
-    />);
+    view.add(<Node position={center}>
+      <ChartXAxis
+        position={chartPosition2}
+        progress={axisProgressS}
+        length={1800}
+        label="file size"
+      />
+      <ChartYAxis
+        position={chartPosition2}
+        progress={axisProgressS}
+        length={1000}
+        label="line number lookup time"
+      />
+      <ChartSeries
+        position={chartPosition}
+        points={minSamples.map((sample) => [getX(sample), getY(sample)])}
+        xProgress={xS}
+        label={'best case'}
+      />
+      <ChartSeries
+        position={chartPosition}
+        points={maxSamples.map((sample) => [getX(sample), getY(sample)])}
+        xProgress={xS}
+        label={'worst case'}
+      />
+    </Node>);
+
+    let axisProgressDuration = 0.5;
+    let fps = 60;
+    for (let i = 0; i < axisProgressDuration * fps; ++i) {
+      axisProgressS(i / (axisProgressDuration * fps));
+      yield *waitFor(1 / fps);
+    }
+
     for (; xS() < maxX; xS(xS() + 1)) {
-        yield *waitFor(1 / 60);
+        yield *waitFor(1 / fps);
     }
 });
 

@@ -85,13 +85,86 @@ export class ChartSeries<Sample> extends Node {
 
     let maxTextWidth = 1000;
     this.add(<Txt
-        text={this.label}
+        text={createSignal(() => this.xProgress() === 0 ? '' : this.label())}
         textAlign="left"
         minWidth={maxTextWidth}
         fill="#e13238"
         x={createSignal(() => this.xProgress() + maxTextWidth/2)}
         y={createSignal(() => dataS().y)}
         width={500}
+    />);
+  }
+}
+
+interface ChartXAxisProps extends NodeProps {
+  length: SignalValue<number>;
+  progress: SignalValue<number>;
+  label: SignalValue<string>;
+}
+
+export class ChartXAxis extends Node {
+  @signal()
+  public declare readonly length: SimpleSignal<number, this>;
+  @signal()
+  public declare readonly progress: SimpleSignal<number, this>;
+  @signal()
+  public declare readonly label: SimpleSignal<string, this>;
+
+  public constructor(props?: CharXAxisProps) {
+    super({...props});
+
+    this.add(<Txt
+        text={this.label}
+        textAlign="left"
+        fill="#e13238"
+        x={createSignal(() => this.length()/2)}
+        y={40}
+    />);
+
+    this.add(<Line
+        x={0}
+        y={0}
+        lineWidth={2}
+        end={this.progress}
+        points={createSignal(() => [[0, 0], [this.length(), 0]])}
+        stroke="#e13238"
+    />);
+  }
+}
+
+interface ChartYAxisProps extends NodeProps {
+  length: SignalValue<number>;
+  progress: SignalValue<number>;
+  label: SignalValue<string>;
+}
+
+export class ChartYAxis extends Node {
+  @signal()
+  public declare readonly length: SimpleSignal<number, this>;
+  @signal()
+  public declare readonly progress: SimpleSignal<number, this>;
+  @signal()
+  public declare readonly label: SimpleSignal<string, this>;
+
+  public constructor(props?: CharXAxisProps) {
+    super({...props});
+
+    this.add(<Txt
+        text={this.label}
+        textAlign="left"
+        fill="#e13238"
+        rotation={-90}
+        x={-40}
+        y={createSignal(() => -this.length()/2)}
+    />);
+
+    this.add(<Line
+        x={0}
+        y={0}
+        lineWidth={2}
+        end={this.progress}
+        points={createSignal(() => [[0, 0], [0, -this.length()]])}
+        stroke="#e13238"
     />);
   }
 }
