@@ -43,12 +43,12 @@ export class ChartSeries extends Node {
     });
 
     function getPointIndex(x) {
-      for (let i = 0; i < points.length; ++i) {
-        if (points[i][0] > x) {
-          return i-1;
+      for (let i = points.length; i --> 0;) {
+        if (points[i][0] <= x) {
+          return i;
         }
       }
-      return points.length - 1;
+      return 0;
     }
 
     let cumulativeDistances = [0];
