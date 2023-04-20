@@ -10,13 +10,13 @@ import {linear} from '@motion-canvas/core/lib/tweening';
 import {makeScene2D} from '@motion-canvas/2d/lib/scenes';
 import {waitFor} from '@motion-canvas/core/lib/flow';
 
-interface ChartSeriesProps<Sample> extends NodeProps {
+interface ChartSeriesProps extends NodeProps {
   points: SignalValue<[number, number][]>;
   xProgress: SignalValue<number>;
   label: SignalValue<string>;
 }
 
-export class ChartSeries<Sample> extends Node {
+export class ChartSeries extends Node {
   @signal()
   public declare readonly points: SimpleSignal<[number, number][], this>;
   @signal()
@@ -24,7 +24,7 @@ export class ChartSeries<Sample> extends Node {
   @signal()
   public declare readonly label: SimpleSignal<string, this>;
 
-  public constructor(props?: ChartSeriesProps<Sample>) {
+  public constructor(props?: ChartSeriesProps) {
     let {getX, getY} = props;
     super({...props});
 
