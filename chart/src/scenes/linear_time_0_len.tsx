@@ -18,8 +18,11 @@ export default makeScene2D(function* (view) {
     let viewHeight = view.height();
     let center = [-viewWidth/2, viewHeight/2];
 
-    let chartWidth = 1550;
-    let chartHeight = 850;
+    let chartOuterPadding = {top: 50, bottom: 100, left: 100, right: 50};
+    let chartInnerPadding = {top: 50, right: 100};
+    let chartWidth = viewWidth - (chartOuterPadding.left + chartOuterPadding.right + chartInnerPadding.right);
+    let chartHeight = viewHeight - (chartOuterPadding.top + chartOuterPadding.bottom + chartInnerPadding.top);
+    let chartPosition = [chartOuterPadding.left, -chartOuterPadding.bottom];
 
     let xTicks = [
       [100 * 1024, '100 KiB'],
@@ -41,24 +44,21 @@ export default makeScene2D(function* (view) {
       return -(chartHeight * sample.duration_ns / maxSampleY);
     }
 
-    let chartPosition = [100, -100];
-    let chartPosition2 = [100, -100];
-
     let labelProgressS = createSignal(0);
     let axisProgressS = createSignal(0);
     let xS = createSignal(0);
     view.add(<Node position={center}>
       <ChartXAxis
-        position={chartPosition2}
+        position={chartPosition}
         progress={axisProgressS}
-        length={chartWidth + 100}
+        length={chartWidth + chartInnerPadding.right}
         ticks={xTicks.map(([sampleX, label]) => [sampleX * xSampleToScreen, label])}
         label="file size"
       />
       <ChartYAxis
-        position={chartPosition2}
+        position={chartPosition}
         progress={axisProgressS}
-        length={chartHeight + 100}
+        length={chartHeight + chartInnerPadding.top}
         label="line number lookup time"
       />
       <ChartSeries
