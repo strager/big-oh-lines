@@ -10,12 +10,14 @@ import {linear} from '@motion-canvas/core/lib/tweening';
 import {makeScene2D} from '@motion-canvas/2d/lib/scenes';
 import {waitFor} from '@motion-canvas/core/lib/flow';
 
+let font = 'Comic Sans MS';
+
 export function computeChartStuff(view) {
     let viewWidth = view.width();
     let viewHeight = view.height();
     let center = [-viewWidth/2, viewHeight/2];
 
-    let chartOuterPadding = {top: 50, bottom: 100, left: 100, right: 50};
+    let chartOuterPadding = {top: 50, bottom: 100, left: 170, right: 50};
     let chartInnerPadding = {top: 50, right: 100};
     let chartWidth = viewWidth - (chartOuterPadding.left + chartOuterPadding.right + chartInnerPadding.right);
     let chartHeight = viewHeight - (chartOuterPadding.top + chartOuterPadding.bottom + chartInnerPadding.top);
@@ -136,11 +138,12 @@ export class ChartSeries extends Node {
 
     let maxTextWidth = 1000;
     this.add(<Txt
+        fontFamily={font}
         text={this.label}
         textAlign="left"
         minWidth={maxTextWidth}
         fill={this.color}
-        x={createSignal(() => this.xProgress() + maxTextWidth/2)}
+        x={createSignal(() => this.xProgress() + maxTextWidth/2 + 8)}
         y={createSignal(() => Math.max(Math.min(dataS().y, this.labelMinY()), this.labelMaxY()))}
         width={500}
         opacity={this.labelProgress}
@@ -170,8 +173,9 @@ export class ChartXAxis extends Node {
     super({...props});
 
     this.add(<Txt
+        fontFamily={font}
         text={this.label}
-        textAlign="left"
+        textAlign="center"
         fill="#bbb"
         x={createSignal(() => this.length()/2)}
         y={40}
@@ -195,8 +199,9 @@ export class ChartXAxis extends Node {
           opacity={createSignal(() => this.length() * this.progress() >= tickX ? 1 : 0)}
       />);
       this.add(<Txt
+          fontFamily={font}
           text={tickLabel}
-          textAlign="left"
+          textAlign="center"
           fill="#bbb"
           x={tickX}
           y={40}
@@ -224,11 +229,12 @@ export class ChartYAxis extends Node {
     super({...props});
 
     this.add(<Txt
+        fontFamily={font}
         text={this.label}
-        textAlign="left"
+        textAlign="center"
         fill="#bbb"
         rotation={-90}
-        x={-40}
+        x={createSignal(() => -40 * countLines(this.label()))}
         y={createSignal(() => -this.length()/2)}
         opacity={this.progress}
     />);
@@ -242,4 +248,8 @@ export class ChartYAxis extends Node {
         stroke="#bbb"
     />);
   }
+}
+
+function countLines(s) {
+  return s.split("\n").length;
 }

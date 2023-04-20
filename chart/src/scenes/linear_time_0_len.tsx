@@ -65,7 +65,7 @@ function* generateScene(name, view) {
         position={chartPosition}
         progress={axisProgressS}
         length={chartHeight + chartInnerPadding.top}
-        label="line number lookup time"
+        label={"algorithm time\n(lower is better)"}
       />
       <ChartSeries
         position={chartPosition}
