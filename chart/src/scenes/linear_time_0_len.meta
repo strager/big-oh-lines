@@ -1,5 +1,14 @@
 {
   "version": 0,
-  "timeEvents": [],
+  "timeEvents": [
+    {
+      "name": "show labels",
+      "targetTime": 0.6049520455628905
+    },
+    {
+      "name": "show data",
+      "targetTime": 2.0865623540628677
+    }
+  ],
   "seed": 442110977
 }

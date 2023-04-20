@@ -10,7 +10,7 @@ import type {SignalValue} from '@motion-canvas/core/lib/signals';
 import {linear} from '@motion-canvas/core/lib/tweening';
 import * as ease from '@motion-canvas/core/lib/tweening';
 import {makeScene2D} from '@motion-canvas/2d/lib/scenes';
-import {waitFor} from '@motion-canvas/core/lib/flow';
+import {waitFor, waitUntil} from '@motion-canvas/core/lib/flow';
 import {ChartSeries, ChartXAxis, ChartYAxis} from '../chart.tsx';
 
 export default makeScene2D(function* (view) {
@@ -33,6 +33,7 @@ export default makeScene2D(function* (view) {
     let chartPosition = [100, -100];
     let chartPosition2 = [100, -100];
 
+    let labelProgressS = createSignal(0);
     let axisProgressS = createSignal(0);
     let xS = createSignal(0);
     view.add(<Node position={center}>
@@ -52,6 +53,7 @@ export default makeScene2D(function* (view) {
         position={chartPosition}
         points={minSamples.map((sample) => [getX(sample), getY(sample)])}
         xProgress={xS}
+        labelProgress={labelProgressS}
         label={'best case'}
         color={'#00ff00'}
       />
@@ -59,6 +61,7 @@ export default makeScene2D(function* (view) {
         position={chartPosition}
         points={maxSamples.map((sample) => [getX(sample), getY(sample)])}
         xProgress={xS}
+        labelProgress={labelProgressS}
         label={'worst case'}
         labelMinY={-60}
         color={'#ff0000'}
@@ -68,10 +71,18 @@ export default makeScene2D(function* (view) {
     let fps = 60;
     let axisProgressDuration = 0.5;
     for (let i = 0; i < axisProgressDuration * fps; ++i) {
-      axisProgressS(i / (axisProgressDuration * fps));
+      axisProgressS(ease.easeInOutCirc(i / (axisProgressDuration * fps)));
       yield *waitFor(1 / fps);
     }
 
+    yield *waitUntil('show labels');
+    let labelsDuration = 0.5;
+    for (let i = 0; i < labelsDuration * fps; ++i) {
+      labelProgressS(ease.easeInOutCirc(i / (labelsDuration * fps)));
+      yield *waitFor(1 / fps);
+    }
+
+    yield *waitUntil('show data');
     let progressDuration = 8;
     for (let i = 0; i < progressDuration * fps; ++i) {
       xS(maxX * ease.easeInOutExpo(i / (progressDuration * fps)));

@@ -14,6 +14,7 @@ interface ChartSeriesProps extends NodeProps {
   points: SignalValue<[number, number][]>;
   xProgress: SignalValue<number>;
   label: SignalValue<string>;
+  labelProgress: SignalValue<number>;
   labelMinY?: SignalValue<number>;
   color: SignalValue<PossibleColor>;
 }
@@ -25,6 +26,8 @@ export class ChartSeries extends Node {
   public declare readonly xProgress: SimpleSignal<number, this>;
   @signal()
   public declare readonly label: SimpleSignal<string, this>;
+  @signal()
+  public declare readonly labelProgress: SimpleSignal<number, this>;
   @initial(-20)
   @signal()
   public declare readonly labelMinY: SimpleSignal<number, this>;
@@ -92,13 +95,14 @@ export class ChartSeries extends Node {
 
     let maxTextWidth = 1000;
     this.add(<Txt
-        text={createSignal(() => this.xProgress() === 0 ? '' : this.label())}
+        text={this.label}
         textAlign="left"
         minWidth={maxTextWidth}
         fill={this.color}
         x={createSignal(() => this.xProgress() + maxTextWidth/2)}
         y={createSignal(() => Math.min(dataS().y, this.labelMinY()))}
         width={500}
+        opacity={this.labelProgress}
     />);
   }
 }
