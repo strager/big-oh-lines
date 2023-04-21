@@ -84,14 +84,18 @@ export class ChartSeries extends Node {
     let {getX, getY} = props;
     super({...props});
 
-    let points = [...props.points];
-    points.sort((a, b) => {
-        if (a[0] < b[0]) return -1;
-        if (a[0] > b[0]) return +1;
-        return 0;
+    let pointsS = createSignal(() => {
+      let points = [...this.points()];
+      points.sort((a, b) => {
+          if (a[0] < b[0]) return -1;
+          if (a[0] > b[0]) return +1;
+          return 0;
+      });
+      return points;
     });
 
     function getPointIndex(x) {
+      let points = pointsS();
       for (let i = points.length; i --> 0;) {
         if (points[i][0] <= x) {
           return i;
@@ -100,20 +104,26 @@ export class ChartSeries extends Node {
       return 0;
     }
 
-    let cumulativeDistances = [0];
-    for (let i = 0; i < points.length - 1; ++i) {
-        let p0 = points[i];
-        let p1 = points[i + 1];
-        let dx = p0[0] - p1[0];
-        let dy = p0[1] - p1[1];
-        let distance = Math.sqrt(dx*dx + dy*dy);
-        cumulativeDistances.push(distance + cumulativeDistances.at(-1));
-    }
-    let totalDistance = cumulativeDistances.at(-1);
+    let cumulativeDistancesS = createSignal(() => {
+      let points = pointsS();
+      let cumulativeDistances = [0];
+      for (let i = 0; i < points.length - 1; ++i) {
+          let p0 = points[i];
+          let p1 = points[i + 1];
+          let dx = p0[0] - p1[0];
+          let dy = p0[1] - p1[1];
+          let distance = Math.sqrt(dx*dx + dy*dy);
+          cumulativeDistances.push(distance + cumulativeDistances.at(-1));
+      }
+      return cumulativeDistances;
+    });
 
     let dataS = createSignal(() => {
       let x = this.xProgress();
+      let cumulativeDistances = cumulativeDistancesS();
+      let totalDistance = cumulativeDistances.at(-1);
       let i = getPointIndex(x);
+      let points = pointsS();
       if (i+1 >= points.length) {
         return {
           end: totalDistance,
@@ -141,7 +151,7 @@ export class ChartSeries extends Node {
         y={0}
         lineWidth={2}
         end={createSignal(() => dataS().end)}
-        points={points}
+        points={pointsS}
         stroke={this.color}
     />);
 

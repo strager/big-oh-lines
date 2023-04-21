@@ -22,6 +22,9 @@ pub fn main() {
         "linear_time_0_len" => {
             linear_time_0_len(&mut out, &imps);
         }
+        "linelinear_time_0_len" => {
+            linelinear_time_0_len(&mut out, &imps);
+        }
         _ => {
             eprintln!("error: unknown scenario: {scenario_name}");
         }
@@ -72,6 +75,35 @@ pub fn linear_time_0_len(out: &mut impl Write, imps: &[Implementation]) {
         let text: Vec<u8> = generate_realisticish_text(line_count);
         for (lookup_type, offsets) in [
             ("at beginning", &[0usize; 50][..]),
+            ("at end", &[text.len() - 1; 50][..]),
+        ] {
+            for _ in 0..5 {
+                test(out, &format!(
+                    "\"text_type\": \"realisticish\",\n\"text_lines\": {},\n\"text_bytes\": {},\n\"lookup_type\": \"{lookup_type}\",\n\"lookups\": {}",
+                    count_lines(&text),
+                    text.len(),
+                    offsets.len(),
+                ),
+                    &text, &offsets, &imp);
+            }
+        }
+    }
+}
+
+pub fn linelinear_time_0_len(out: &mut impl Write, imps: &[Implementation]) {
+    let mut line_counts: Vec<usize> = geomspace(1.0, 3_000.0, 10000)
+        .map(|raw_line_count: f64| raw_line_count as usize)
+        .collect();
+    line_counts.dedup();
+
+    let imp: &Implementation = imps
+        .iter()
+        .filter(|imp| imp.name == "bol_linelinear")
+        .next()
+        .unwrap();
+    for line_count in line_counts {
+        let text: Vec<u8> = generate_realisticish_text(line_count);
+        for (lookup_type, offsets) in [
             ("at end", &[text.len() - 1; 50][..]),
         ] {
             for _ in 0..5 {
