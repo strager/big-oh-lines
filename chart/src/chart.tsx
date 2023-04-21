@@ -10,7 +10,7 @@ import {linear} from '@motion-canvas/core/lib/tweening';
 import {makeScene2D} from '@motion-canvas/2d/lib/scenes';
 import {waitFor} from '@motion-canvas/core/lib/flow';
 
-let font = 'Comic Sans MS';
+export let font = 'Comic Sans MS';
 
 export let colors = {
     green: 'rgb(112, 173, 71)',
@@ -226,6 +226,7 @@ interface ChartXTickProps extends NodeProps {
   label: SignalValue<string>;
   lineOpacity?: SignalValue<number>;
   labelOpacity?: SignalValue<number>;
+  labelOffsetY?: SignalValue<number>;
 }
 
 export class ChartXTick extends Node {
@@ -239,6 +240,9 @@ export class ChartXTick extends Node {
   @initial(1)
   @signal()
   public declare readonly labelOpacity: SimpleSignal<number, this>;
+  @initial(0)
+  @signal()
+  public declare readonly labelOffsetY: SimpleSignal<number, this>;
 
   public constructor(props?: CharXAxisProps) {
     super({...props});
@@ -255,7 +259,7 @@ export class ChartXTick extends Node {
         textAlign="center"
         fill="#bbb"
         x={this.tickX}
-        y={40}
+        y={createSignal(() => 40 + this.labelOffsetY())}
         opacity={this.labelOpacity}
     />);
   }

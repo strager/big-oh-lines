@@ -11,7 +11,7 @@ import {linear} from '@motion-canvas/core/lib/tweening';
 import * as ease from '@motion-canvas/core/lib/tweening';
 import {makeScene2D} from '@motion-canvas/2d/lib/scenes';
 import {waitFor, waitUntil} from '@motion-canvas/core/lib/flow';
-import {ChartSeries, ChartXAxis, ChartYAxis, computeChartStuff, mergeSamplesMin, colors} from '../chart.tsx';
+import {ChartSeries, ChartXAxis, ChartYAxis, ChartXTick, computeChartStuff, mergeSamplesMin, colors, font} from '../chart.tsx';
 import {ValueDispatcher} from '@motion-canvas/core/lib/events';
 
 let samples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at end' && sample.imp === 'bol_linelinear'));
@@ -30,19 +30,35 @@ function* generateScene(name, view) {
     let {chartWidth, chartHeight, chartPosition, chartInnerPadding, chartOuterPadding, center, fps} = computeChartStuff(view);
 
     let xTicks = [
-      [512, '512 B'],
+      [100, '100 B'],
+      [200, '200 B'],
+      [300, '300 B'],
+      [400, '400 B'],
+      [500, '500 B'],
       [10 * 1024, '10 KiB'],
       [100 * 1024, '100 KiB'],
     ];
 
-    let smallLineCount = 17;
-    let bytesAtSmallLineCount;
-    for (let sample of data) {
-      if (sample.text_lines === smallLineCount) {
-        bytesAtSmallLineCount = sample.text_bytes;
-        break;
+    function lineToBytes(line) {
+      for (let sample of data) {
+        if (sample.text_lines === line) {
+          return sample.text_bytes;
+        }
       }
+      throw new Error(`could not convert line ${line} to bytes`);
     }
+
+    let lineXTicks = [
+      [{text_lines: 5}, '5'],
+      [{text_lines: 10}, '10'],
+      [{text_lines: 15}, '15'],
+    ];
+    for (let [sample, _label] of lineXTicks) {
+      sample.text_bytes = lineToBytes(sample.text_lines);
+    }
+
+    let smallLineCount = 17;
+    let bytesAtSmallLineCount = lineToBytes(smallLineCount);
 
     let maxSampleX = Math.max(...data.map((sample) => sample.text_bytes));
     let maxTickX = Math.max(...xTicks.map(([sampleX, _label]) => sampleX));
@@ -65,15 +81,46 @@ function* generateScene(name, view) {
     }
 
     let zoomS = createSignal(0);
+    let retickS = createSignal(0);
+    let retickYOffsetS = createSignal(() => (1-retickS()) * 30);
     let rexS = createSignal(0);
+    let chartLabelX = (chartWidth + chartInnerPadding.right)/2 - 50;
     view.add(<Node position={center}>
       <ChartXAxis
         position={chartPosition}
         progress={1}
         length={chartWidth + chartInnerPadding.right}
-        ticks={createSignal(() => xTicks.map(([sampleX, label]) => [sampleX * xSampleToScreenS(), label]))}
-        label="file size"
+        ticks={[]}
+        label=""
       />
+
+      <Node position={chartPosition}>
+        <Txt
+            fontFamily={font}
+            text="file size"
+            textAlign="center"
+            fill="#bbb"
+            x={chartLabelX}
+            y={40}
+            opacity={createSignal(() => 1-zoomS())}
+        />
+        <Txt
+            fontFamily={font}
+            text="# lines"
+            textAlign="center"
+            fill="#bbb"
+            x={chartLabelX}
+            y={createSignal(() => 40 + retickYOffsetS())}
+            opacity={retickS}
+        />
+        {xTicks.map(([sampleX, tickLabel]) =>
+          <ChartXTick
+            tickX={createSignal(() => sampleX * xSampleToScreenS())}
+            label={tickLabel}
+            opacity={createSignal(() =>
+              sampleX < 500 && zoomS() < 0.95 ? ease.easeInCubic(zoomS()/0.95) : 1-retickS())}
+          />)}
+      </Node>
       <ChartYAxis
         position={chartPosition}
         progress={1}
@@ -89,6 +136,15 @@ function* generateScene(name, view) {
         labelMinY={-20}
         color={colors.blue}
       />
+      <Node opacity={retickS} position={chartPosition}>
+        {lineXTicks.map(([tickX, tickLabel]) =>
+          <ChartXTick
+            tickX={createSignal(() => getX(tickX))}
+            label={tickLabel}
+            labelOffsetY={retickYOffsetS}
+          />
+        )}
+      </Node>
     </Node>);
 
     yield *waitFor(1 / fps);
@@ -102,6 +158,15 @@ function* generateScene(name, view) {
     }
     zoomS(1);
 
+    if (name === 'linelinear_stats_len_small.retick') {
+      let retickDuration = 2;
+      for (let i = 0; i <= retickDuration * fps; ++i) {
+        retickS(ease.easeInOutExpo(i / (retickDuration * fps)));
+        yield *waitFor(1 / fps);
+      }
+    }
+    retickS(1);
+
     if (name === 'linelinear_stats_len_small.rex') {
       let rexDuration = 4;
       for (let i = 0; i <= rexDuration * fps; ++i) {
@@ -114,5 +179,6 @@ function* generateScene(name, view) {
 
 export let scenes = [
   makeSubscene('linelinear_stats_len_small.zoom'),
+  makeSubscene('linelinear_stats_len_small.retick'),
   makeSubscene('linelinear_stats_len_small.rex'),
 ];
