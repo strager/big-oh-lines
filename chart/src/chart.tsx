@@ -210,14 +210,14 @@ export class ChartXAxis extends Node {
         stroke="#bbb"
     />);
 
-    for (let [tickX, tickLabel] of this.ticks()) {
-      this.add(<Line
+    this.add(<Node spawner={() => this.ticks().map(([tickX, tickLabel]) => <Node>
+      <Line
           lineWidth={2}
           points={[[tickX, 10], [tickX, -10]]}
           stroke="#bbb"
           opacity={createSignal(() => this.length() * this.progress() >= tickX ? 1 : 0)}
-      />);
-      this.add(<Txt
+      />
+      <Txt
           fontFamily={font}
           text={tickLabel}
           textAlign="center"
@@ -225,8 +225,8 @@ export class ChartXAxis extends Node {
           x={tickX}
           y={40}
           opacity={this.progress}
-      />);
-    }
+      />
+    </Node>)} />);
   }
 }
 

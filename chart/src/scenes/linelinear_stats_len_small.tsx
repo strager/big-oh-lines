@@ -1,5 +1,4 @@
-import bigData from '../../../data/linelinear_time_0_len.json';
-import smallData from '../../../data/linelinear_time_0_len_small.json';
+import data from '../../../data/linelinear_stats_len_small.json';
 import type {ThreadGenerator} from '@motion-canvas/core/lib/threading';
 import {Circle, Line, Txt, Rect, Node} from '@motion-canvas/2d/lib/components';
 import type {NodeProps} from '@motion-canvas/2d/lib/components';
@@ -15,16 +14,10 @@ import {waitFor, waitUntil} from '@motion-canvas/core/lib/flow';
 import {ChartSeries, ChartXAxis, ChartYAxis, computeChartStuff, mergeSamplesMin, colors} from '../chart.tsx';
 import {ValueDispatcher} from '@motion-canvas/core/lib/events';
 
-let allData = [...bigData, ...smallData];
-allData.sort((a, b) => {
-  if (a.text_bytes < b.text_bytes) return -1;
-  if (a.text_bytes > b.text_bytes) return +1;
-  return 0;
-});
+let samples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at end' && sample.imp === 'bol_linelinear'));
+console.log(samples)
 
-let samples = mergeSamplesMin(allData.filter((sample) => sample.lookup_type === 'at end' && sample.imp === 'bol_linelinear'));
-
-let maxSampleY = Math.max(...samples.map((sample) => sample.duration_ns));
+let maxSampleY = Math.max(...samples.map((sample) => sample.comparisons));
 
 function makeSubscene(name) {
   let scene = makeScene2D(function (view) { return generateScene(name, view); });
@@ -37,28 +30,38 @@ function* generateScene(name, view) {
     let {chartWidth, chartHeight, chartPosition, chartInnerPadding, chartOuterPadding, center, fps} = computeChartStuff(view);
 
     let xTicks = [
+      [512, '512 B'],
+      [10 * 1024, '10 KiB'],
       [100 * 1024, '100 KiB'],
     ];
 
-    let maxSampleX = Math.max(...allData.map((sample) => sample.text_bytes));
+    let smallLineCount = 17;
+    let bytesAtSmallLineCount;
+    for (let sample of data) {
+      if (sample.text_lines === smallLineCount) {
+        bytesAtSmallLineCount = sample.text_bytes;
+        break;
+      }
+    }
+
+    let maxSampleX = Math.max(...data.map((sample) => sample.text_bytes));
     let maxTickX = Math.max(...xTicks.map(([sampleX, _label]) => sampleX));
-    let xSampleToScreen = chartWidth / Math.max(maxSampleX, maxTickX);
-    let xSampleToScreenZoomed = chartWidth / 800;
-    let xSampleToScreenZoomedRex = chartWidth / 30;
+    let xSampleToScreenOrig = chartWidth / Math.max(maxSampleX, maxTickX);
+    let xSampleToScreenZoomed = chartWidth / bytesAtSmallLineCount;
+    let xSampleToScreenS = createSignal(() => (1-zoomS())*xSampleToScreenOrig + zoomS()*xSampleToScreenZoomed);
+    let xSampleToScreenZoomedRex = chartWidth / smallLineCount;
     function getX(sample) {
-      let zoom = zoomS();
-      let textBytesX = (zoom*xSampleToScreenZoomed + (1-zoom)*xSampleToScreen) * sample.text_bytes;
+      let textBytesX = xSampleToScreenS() * sample.text_bytes;
       let textLinesX = xSampleToScreenZoomedRex * sample.text_lines;
       let rex = rexS();
       return rex*textLinesX + (1-rex)*textBytesX;
     }
-    let maxX = chartWidth * maxSampleX / Math.max(maxSampleX, maxTickX);
 
-    let zoomedSampleY = 600;
+    let zoomedSampleY = 800;
     function getY(sample) {
       let zoom = zoomS();
       let scale = zoom*(1/zoomedSampleY) + (1-zoom)*(1/maxSampleY);
-      return -(chartHeight * sample.duration_ns * scale);
+      return -(chartHeight * sample.comparisons * scale);
     }
 
     let zoomS = createSignal(0);
@@ -68,19 +71,19 @@ function* generateScene(name, view) {
         position={chartPosition}
         progress={1}
         length={chartWidth + chartInnerPadding.right}
-        ticks={xTicks.map(([sampleX, label]) => [sampleX * xSampleToScreen, label])}
+        ticks={createSignal(() => xTicks.map(([sampleX, label]) => [sampleX * xSampleToScreenS(), label]))}
         label="file size"
       />
       <ChartYAxis
         position={chartPosition}
         progress={1}
         length={chartHeight + chartInnerPadding.top}
-        label={"algorithm time\n(lower is better)"}
+        label={"# of comparisons\n(lower is better)"}
       />
       <ChartSeries
         position={chartPosition}
         points={createSignal(() => samples.map((sample) => [getX(sample), getY(sample)]))}
-        xProgress={maxX}
+        xProgress={chartWidth}
         labelProgress={1}
         label={''}
         labelMinY={-20}
@@ -90,7 +93,7 @@ function* generateScene(name, view) {
 
     yield *waitFor(1 / fps);
 
-    if (name === 'linelinear_time_0_len_small.zoom') {
+    if (name === 'linelinear_stats_len_small.zoom') {
       let zoomDuration = 4;
       for (let i = 0; i <= zoomDuration * fps; ++i) {
         zoomS(ease.easeInOutCubic(i / (zoomDuration * fps)));
@@ -99,7 +102,7 @@ function* generateScene(name, view) {
     }
     zoomS(1);
 
-    if (name === 'linelinear_time_0_len_small.rex') {
+    if (name === 'linelinear_stats_len_small.rex') {
       let rexDuration = 4;
       for (let i = 0; i <= rexDuration * fps; ++i) {
         rexS(ease.easeInOutCubic(i / (rexDuration * fps)));
@@ -110,6 +113,6 @@ function* generateScene(name, view) {
 }
 
 export let scenes = [
-  makeSubscene('linelinear_time_0_len_small.zoom'),
-  makeSubscene('linelinear_time_0_len_small.rex'),
+  makeSubscene('linelinear_stats_len_small.zoom'),
+  makeSubscene('linelinear_stats_len_small.rex'),
 ];
