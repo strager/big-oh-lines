@@ -25,6 +25,9 @@ pub fn main() {
         "linelinear_time_0_len" => {
             linelinear_time_0_len(&mut out, &imps);
         }
+        "linelinear_time_0_len_small" => {
+            linelinear_time_0_len_small(&mut out, &imps);
+        }
         _ => {
             eprintln!("error: unknown scenario: {scenario_name}");
         }
@@ -118,6 +121,38 @@ pub fn linelinear_time_0_len(out: &mut impl Write, imps: &[Implementation]) {
         }
     }
 }
+
+pub fn linelinear_time_0_len_small(out: &mut impl Write, imps: &[Implementation]) {
+    let text: Vec<u8> = generate_realisticish_text(15);
+
+    let mut byte_counts: Vec<usize> = geomspace(1.0, text.len() as f64, 10000)
+        .map(|raw_byte_count: f64| raw_byte_count as usize)
+        .collect();
+    byte_counts.dedup();
+
+    for imp in imps {
+        if !(imp.name == "bol_linelinear" || imp.name == "bol_linear") {
+            continue;
+        }
+        for &byte_count in &byte_counts {
+            let subtext: &[u8] = &text[..byte_count];
+            for (lookup_type, offsets) in [
+                ("at end", &[subtext.len() - 1; 50][..]),
+            ] {
+                for _ in 0..50 {
+                    test(out, &format!(
+                        "\"text_type\": \"realisticish\",\n\"text_lines\": {},\n\"text_bytes\": {},\n\"lookup_type\": \"{lookup_type}\",\n\"lookups\": {}",
+                        count_lines(&subtext),
+                        subtext.len(),
+                        offsets.len(),
+                    ),
+                        &subtext, &offsets, &imp);
+                }
+            }
+        }
+    }
+}
+
 
 fn test(
     out: &mut impl Write,

@@ -13,3 +13,4 @@ International License (CC-BY-NC-ND-4.0)](LICENSE)
     $ cargo +nightly run --release --bin=time linear_time_0 >data/linear_time_0.json
     $ cargo +nightly run --release --bin=time linear_time_0_len >data/linear_time_0_len.json
     $ cargo +nightly run --release --bin=time linelinear_time_0_len >data/linelinear_time_0_len.json
+    $ cargo +nightly run --release --bin=time linelinear_time_0_len_small >data/linelinear_time_0_len_small.json
