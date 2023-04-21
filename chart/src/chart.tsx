@@ -210,23 +210,54 @@ export class ChartXAxis extends Node {
         stroke="#bbb"
     />);
 
-    this.add(<Node spawner={() => this.ticks().map(([tickX, tickLabel]) => <Node>
-      <Line
-          lineWidth={2}
-          points={[[tickX, 10], [tickX, -10]]}
-          stroke="#bbb"
-          opacity={createSignal(() => this.length() * this.progress() >= tickX ? 1 : 0)}
+    this.add(<Node spawner={() => this.ticks().map(([tickX, tickLabel]) =>
+      <ChartXTick
+        tickX={tickX}
+        label={tickLabel}
+        lineOpacity={createSignal(() => this.length() * this.progress() >= tickX ? 1 : 0)}
+        labelOpacity={this.progress}
       />
-      <Txt
-          fontFamily={font}
-          text={tickLabel}
-          textAlign="center"
-          fill="#bbb"
-          x={tickX}
-          y={40}
-          opacity={this.progress}
-      />
-    </Node>)} />);
+    )} />);
+  }
+}
+
+interface ChartXTickProps extends NodeProps {
+  tickX: SignalValue<number>;
+  label: SignalValue<string>;
+  lineOpacity?: SignalValue<number>;
+  labelOpacity?: SignalValue<number>;
+}
+
+export class ChartXTick extends Node {
+  @signal()
+  public declare readonly tickX: SimpleSignal<number, this>;
+  @signal()
+  public declare readonly label: SimpleSignal<string, this>;
+  @initial(1)
+  @signal()
+  public declare readonly lineOpacity: SimpleSignal<number, this>;
+  @initial(1)
+  @signal()
+  public declare readonly labelOpacity: SimpleSignal<number, this>;
+
+  public constructor(props?: CharXAxisProps) {
+    super({...props});
+
+    this.add(<Line
+        lineWidth={2}
+        points={createSignal(() => [[this.tickX(), 10], [this.tickX(), -10]])}
+        stroke="#bbb"
+        opacity={this.lineOpacity}
+    />);
+    this.add(<Txt
+        fontFamily={font}
+        text={this.label}
+        textAlign="center"
+        fill="#bbb"
+        x={this.tickX}
+        y={40}
+        opacity={this.labelOpacity}
+    />);
   }
 }
 
