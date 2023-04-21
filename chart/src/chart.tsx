@@ -227,6 +227,7 @@ interface ChartXTickProps extends NodeProps {
   lineOpacity?: SignalValue<number>;
   labelOpacity?: SignalValue<number>;
   labelOffsetY?: SignalValue<number>;
+  color?: SignalValue<PossibleColor>;
 }
 
 export class ChartXTick extends Node {
@@ -243,6 +244,9 @@ export class ChartXTick extends Node {
   @initial(0)
   @signal()
   public declare readonly labelOffsetY: SimpleSignal<number, this>;
+  @initial('#bbb')
+  @colorSignal()
+  public declare readonly color: ColorSignal<this>;
 
   public constructor(props?: CharXAxisProps) {
     super({...props});
@@ -250,14 +254,14 @@ export class ChartXTick extends Node {
     this.add(<Line
         lineWidth={2}
         points={createSignal(() => [[this.tickX(), 10], [this.tickX(), -10]])}
-        stroke="#bbb"
+        stroke={this.color}
         opacity={this.lineOpacity}
     />);
     this.add(<Txt
         fontFamily={font}
         text={this.label}
         textAlign="center"
-        fill="#bbb"
+        fill={this.color}
         x={this.tickX}
         y={createSignal(() => 40 + this.labelOffsetY())}
         opacity={this.labelOpacity}

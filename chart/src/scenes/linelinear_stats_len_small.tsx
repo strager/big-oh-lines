@@ -32,7 +32,7 @@ function* generateScene(name, view) {
     let xTicks = [
       [100, '100 B'],
       [200, '200 B'],
-      [300, '300 B'],
+      //[300, '300 B'],
       [400, '400 B'],
       [500, '500 B'],
       [10 * 1024, '10 KiB'],
@@ -46,6 +46,16 @@ function* generateScene(name, view) {
         }
       }
       throw new Error(`could not convert line ${line} to bytes`);
+    }
+
+    function bytesToLineIsh(bytes) {
+      for (let sample of data) {
+        if (sample.text_bytes >= bytes) {
+          return sample.text_lines;
+        }
+      }
+      return data.at(-1).text_lines;
+      //throw new Error(`could not convert byte ${bytes} to line number`);
     }
 
     let lineXTicks = [
@@ -82,9 +92,9 @@ function* generateScene(name, view) {
 
     let zoomS = createSignal(0);
     let retickS = createSignal(0);
-    let retickYOffsetS = createSignal(() => (1-retickS()) * 30);
+    let retickYOffsetS = createSignal(() => (1-retickS()) * -30 - 80);
     let rexS = createSignal(0);
-    let chartLabelX = (chartWidth + chartInnerPadding.right)/2 - 50;
+    let chartLabelX = (chartWidth + chartInnerPadding.right)/2;
     view.add(<Node position={center}>
       <ChartXAxis
         position={chartPosition}
@@ -102,24 +112,26 @@ function* generateScene(name, view) {
             fill="#bbb"
             x={chartLabelX}
             y={40}
-            opacity={createSignal(() => 1-zoomS())}
+            opacity={1}
         />
         <Txt
             fontFamily={font}
-            text="# lines"
+            text="lines"
             textAlign="center"
-            fill="#bbb"
+            fill={colors.yellow}
             x={chartLabelX}
             y={createSignal(() => 40 + retickYOffsetS())}
             opacity={retickS}
         />
-        {xTicks.map(([sampleX, tickLabel]) =>
-          <ChartXTick
-            tickX={createSignal(() => sampleX * xSampleToScreenS())}
+        {xTicks.map(([bytes, tickLabel]) => {
+          let fakeSample = {text_bytes: bytes, text_lines: bytesToLineIsh(bytes)};
+          return <ChartXTick
+            tickX={createSignal(() => getX(fakeSample))}
             label={tickLabel}
             opacity={createSignal(() =>
-              sampleX < 500 && zoomS() < 0.95 ? ease.easeInCubic(zoomS()/0.95) : 1-retickS())}
-          />)}
+              bytes < 500 && zoomS() < 0.95 ? ease.easeInCubic(zoomS()/0.95) : 1)}
+          />;
+        })}
       </Node>
       <ChartYAxis
         position={chartPosition}
@@ -142,6 +154,7 @@ function* generateScene(name, view) {
             tickX={createSignal(() => getX(tickX))}
             label={tickLabel}
             labelOffsetY={retickYOffsetS}
+            color={colors.yellow}
           />
         )}
       </Node>
