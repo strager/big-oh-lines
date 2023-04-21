@@ -55,7 +55,7 @@ pub fn main() {
 fn test(metadata_json: &str, text: &[u8], offsets: &[usize]) {
     let imps: Vec<Implementation> = load_implementations();
     for imp in imps {
-        if text.len() >= 100_000 && imp.name == "bol_linear" {
+        if text.len() >= 100_000 && (imp.name == "bol_linear" || imp.name == "bol_linearfancy") {
             // HACK(strager): Takes too long.
             continue;
         }

@@ -5,6 +5,7 @@ const IMPLEMENTATION_NAMES: &[&'static str] = &[
     "bol_bsearch",
     "bol_btree",
     "bol_linear",
+    "bol_linearfancy",
     "bol_linelinear",
     "bol_table",
 ];

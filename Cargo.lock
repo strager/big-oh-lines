@@ -33,6 +33,7 @@ dependencies = [
  "bol_bsearch",
  "bol_btree",
  "bol_linear",
+ "bol_linearfancy",
  "bol_linelinear",
  "bol_table",
  "criterion",
@@ -68,6 +69,13 @@ dependencies = [
 
 [[package]]
 name = "bol_linear"
+version = "0.1.0"
+dependencies = [
+ "bol_base",
+]
+
+[[package]]
+name = "bol_linearfancy"
 version = "0.1.0"
 dependencies = [
  "bol_base",
