@@ -11,7 +11,7 @@ impl BOL {
     fn new(text: &[u8]) -> BOL {
         let mut table: Vec<usize> = vec![0; text.len() + 1];
 
-        let mut line: usize = 0;
+        let mut line: usize = 1;
         for i in 0..text.len() {
             table[i] = line;
             if text[i] == b'\n' {

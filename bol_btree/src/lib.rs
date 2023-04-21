@@ -91,14 +91,14 @@ impl BOL {
         // https://github.com/rust-lang/rfcs/issues/1778
         let found_range: std::collections::btree_map::Range<LineOffset, usize> =
             self.line_offsets.range(..=LineOffset(offset));
-        let line: usize = *found_range.last().unwrap().1;
+        let line_index: usize = *found_range.last().unwrap().1;
 
         #[cfg(feature = "bol_stats")]
         {
             self.comparisons += COMPARISONS.with(|cell| cell.get());
         }
 
-        line
+        line_index + 1
     }
 
     #[cfg(feature = "bol_stats")]

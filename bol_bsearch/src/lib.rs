@@ -44,8 +44,8 @@ impl BOL {
         }
 
         match found {
-            Ok(line) => line,
-            Err(next_line) => next_line - 1,
+            Ok(line_index) => line_index + 1,
+            Err(next_line_index) => next_line_index - 1 + 1,
         }
     }
 

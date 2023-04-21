@@ -30,7 +30,7 @@ impl BOL {
     fn offset_to_line(&mut self, offset: usize) -> usize {
         #[cfg(feature = "bol_stats")]
         let mut comparisons: u64 = 0;
-        for (line, &line_offset) in self.line_offsets.iter().enumerate() {
+        for (line_index, &line_offset) in self.line_offsets.iter().enumerate() {
             #[cfg(feature = "bol_stats")]
             {
                 comparisons += 1;
@@ -40,14 +40,14 @@ impl BOL {
                 {
                     self.comparisons += comparisons;
                 }
-                return line;
+                return line_index + 1;
             }
         }
         #[cfg(feature = "bol_stats")]
         {
             self.comparisons += comparisons;
         }
-        self.line_offsets.len()
+        self.line_offsets.len() + 1
     }
 
     #[cfg(feature = "bol_stats")]

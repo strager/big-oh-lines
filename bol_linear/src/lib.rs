@@ -21,7 +21,7 @@ impl<'text> BOL<'text> {
     fn offset_to_line(&mut self, offset: usize) -> usize {
         #[cfg(feature = "bol_stats")]
         let mut comparisons: u64 = 0;
-        let mut line: usize = 0;
+        let mut line: usize = 1;
         for i in 0..offset {
             #[cfg(feature = "bol_stats")]
             {
