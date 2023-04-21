@@ -16,8 +16,12 @@ pub fn main() {
 
     let imps: Vec<Implementation> = load_implementations();
     match scenario_name.as_str() {
-        "linear_time_0" => { linear_time_0(&mut out, &imps); }
-        "linear_time_0_len" => { linear_time_0_len(&mut out, &imps); }
+        "linear_time_0" => {
+            linear_time_0(&mut out, &imps);
+        }
+        "linear_time_0_len" => {
+            linear_time_0_len(&mut out, &imps);
+        }
         _ => {
             eprintln!("error: unknown scenario: {scenario_name}");
         }
@@ -28,12 +32,16 @@ pub fn main() {
 }
 
 pub fn linear_time_0(out: &mut impl Write, imps: &[Implementation]) {
-    let mut line_counts: Vec<usize> = 
-        geomspace(1.0, 3_000.0, 1000).map(|raw_line_count: f64| raw_line_count as usize)
-    .collect();
+    let mut line_counts: Vec<usize> = geomspace(1.0, 3_000.0, 1000)
+        .map(|raw_line_count: f64| raw_line_count as usize)
+        .collect();
     line_counts.dedup();
 
-    let imp: &Implementation = imps.iter().filter(|imp| imp.name == "bol_linear").next().unwrap();
+    let imp: &Implementation = imps
+        .iter()
+        .filter(|imp| imp.name == "bol_linear")
+        .next()
+        .unwrap();
     for line_count in line_counts {
         let text: Vec<u8> = generate_realisticish_text(line_count);
         let offsets: &[usize] = &[0usize; 50][..];
@@ -50,17 +58,21 @@ pub fn linear_time_0(out: &mut impl Write, imps: &[Implementation]) {
 }
 
 pub fn linear_time_0_len(out: &mut impl Write, imps: &[Implementation]) {
-    let mut line_counts: Vec<usize> = 
-        geomspace(1.0, 3_000.0, 10000).map(|raw_line_count: f64| raw_line_count as usize)
-    .collect();
+    let mut line_counts: Vec<usize> = geomspace(1.0, 3_000.0, 10000)
+        .map(|raw_line_count: f64| raw_line_count as usize)
+        .collect();
     line_counts.dedup();
 
-    let imp: &Implementation = imps.iter().filter(|imp| imp.name == "bol_linear").next().unwrap();
+    let imp: &Implementation = imps
+        .iter()
+        .filter(|imp| imp.name == "bol_linear")
+        .next()
+        .unwrap();
     for line_count in line_counts {
         let text: Vec<u8> = generate_realisticish_text(line_count);
         for (lookup_type, offsets) in [
             ("at beginning", &[0usize; 50][..]),
-            ("at end", &[text.len()-1; 50][..]),
+            ("at end", &[text.len() - 1; 50][..]),
         ] {
             for _ in 0..5 {
                 test(out, &format!(
@@ -75,7 +87,13 @@ pub fn linear_time_0_len(out: &mut impl Write, imps: &[Implementation]) {
     }
 }
 
-fn test(out: &mut impl Write, metadata_json: &str, text: &[u8], offsets: &[usize], imp: &Implementation) {
+fn test(
+    out: &mut impl Write,
+    metadata_json: &str,
+    text: &[u8],
+    offsets: &[usize],
+    imp: &Implementation,
+) {
     let mut bol: BOL = imp.create(text);
     let start: std::time::Instant = std::time::Instant::now();
     for &offset in offsets {

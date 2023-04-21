@@ -6,9 +6,11 @@ static mut NEED_COMMA: bool = false;
 pub fn main() {
     println!("[");
 
-    let mut line_counts: Vec<usize> = (1..1000).chain(
-        geomspace(1_000.0, 1_000_000.0, 100).map(|raw_line_count: f64| raw_line_count as usize)
-    ).collect();
+    let mut line_counts: Vec<usize> = (1..1000)
+        .chain(
+            geomspace(1_000.0, 1_000_000.0, 100).map(|raw_line_count: f64| raw_line_count as usize),
+        )
+        .collect();
     line_counts.dedup();
 
     for line_count in line_counts {

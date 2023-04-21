@@ -4,7 +4,9 @@ use bol_base::define_bol_c_api;
 use bol_base::*;
 
 struct BOL {
-    // Offset in the text where each line starts.
+    // Offset in the text where each line starts, except the first line.
+    //
+    // line_offsets[0] is the offset of the second line.
     line_offsets: Vec<usize>,
     #[cfg(feature = "bol_stats")]
     comparisons: u64,
@@ -13,7 +15,6 @@ struct BOL {
 impl BOL {
     fn new(text: &[u8]) -> BOL {
         let mut line_offsets: Vec<usize> = Vec::new();
-        line_offsets.push(0);
         for i in 0..text.len() {
             if text[i] == b'\n' {
                 line_offsets.push(i + 1)
@@ -34,7 +35,7 @@ impl BOL {
             {
                 comparisons += 1;
             }
-            if offset >= line_offset {
+            if offset < line_offset {
                 #[cfg(feature = "bol_stats")]
                 {
                     self.comparisons += comparisons;
@@ -46,7 +47,7 @@ impl BOL {
         {
             self.comparisons += comparisons;
         }
-        self.line_offsets[self.line_offsets.len() - 1]
+        self.line_offsets.len()
     }
 
     #[cfg(feature = "bol_stats")]
