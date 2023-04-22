@@ -11,7 +11,7 @@ import {linear} from '@motion-canvas/core/lib/tweening';
 import * as ease from '@motion-canvas/core/lib/tweening';
 import {makeScene2D} from '@motion-canvas/2d/lib/scenes';
 import {waitFor, waitUntil} from '@motion-canvas/core/lib/flow';
-import {ChartSeries, ChartXAxis, ChartYAxis, ChartXTick, computeChartStuff, mergeSamplesMin, mergeSamplesMax, colors, font} from '../chart.tsx';
+import {ChartSeries, ChartXAxis, ChartYAxis, ChartXTick, ChartYTick, computeChartStuff, mergeSamplesMin, mergeSamplesMax, colors, font} from '../chart.tsx';
 import {ValueDispatcher} from '@motion-canvas/core/lib/events';
 
 let linelinearSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_linelinear'));
@@ -37,6 +37,11 @@ function* generateScene(name, view) {
       [128, '128'],
       [256, '256'],
     ];
+
+    let yTicks = [ ];
+    for (let i = 1; i <= 9; ++i) {
+      yTicks.push([i, i.toString()]);
+    }
 
     let maxLineCount = data.at(-1).text_lines;
 
@@ -73,8 +78,15 @@ function* generateScene(name, view) {
         position={chartPosition}
         progress={1}
         length={chartHeight + chartInnerPadding.top}
-        label={"# of comparisons\n(lower is better)"}
+        label={"# of comparisons\n"}
       />
+      <Node position={chartPosition} opacity={zoomS}>
+        {yTicks.map(([sampleY, label]) => 
+          <ChartYTick
+            tickY={createSignal(() => getY({comparisons: sampleY}))}
+            label={label}
+          />)}
+      </Node>
       <ChartSeries
         position={chartPosition}
         points={linelinearSamples.map((sample) => [getX(sample), getY(sample)])}

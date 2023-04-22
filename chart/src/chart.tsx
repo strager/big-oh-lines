@@ -333,6 +333,35 @@ export class ChartYAxis extends Node {
   }
 }
 
+export class ChartYTick extends Node {
+  @signal()
+  public declare readonly tickY: SimpleSignal<number, this>;
+  @signal()
+  public declare readonly label: SimpleSignal<string, this>;
+  @initial('#bbb')
+  @colorSignal()
+  public declare readonly color: ColorSignal<this>;
+
+  public constructor(props?) {
+    super({...props});
+
+    let maxTextWidth = 1000;
+    this.add(<Line
+        lineWidth={2}
+        points={createSignal(() => [[-10, this.tickY()], [10, this.tickY()]])}
+        stroke={this.color}
+    />);
+    this.add(<Txt
+        fontFamily={font}
+        text={this.label}
+        textAlign="right"
+        minWidth={maxTextWidth}
+        fill={this.color}
+        x={-15 - maxTextWidth/2}
+        y={this.tickY}
+    />);
+  }
+}
 function countLines(s) {
   return s.split("\n").length;
 }
