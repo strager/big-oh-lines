@@ -72,7 +72,7 @@ interface ChartSeriesProps extends NodeProps {
   points: SignalValue<[number, number][]>;
   xProgress: SignalValue<number>;
   label: SignalValue<string>;
-  labelProgress: SignalValue<number>;
+  labelProgress?: SignalValue<number>;
   labelMinY?: SignalValue<number>;
   labelMaxY?: SignalValue<number>;
   color: SignalValue<PossibleColor>;
@@ -85,6 +85,7 @@ export class ChartSeries extends Node {
   public declare readonly xProgress: SimpleSignal<number, this>;
   @signal()
   public declare readonly label: SimpleSignal<string, this>;
+  @initial(1)
   @signal()
   public declare readonly labelProgress: SimpleSignal<number, this>;
   @initial(-20)
@@ -188,7 +189,7 @@ export class ChartSeries extends Node {
 
 interface ChartXAxisProps extends NodeProps {
   length: SignalValue<number>;
-  progress: SignalValue<number>;
+  progress?: SignalValue<number>;
   label: SignalValue<string>;
   ticks?: SignalValue<[number, string][]>;
   tickHeights?: SignalValue<number>;
@@ -197,6 +198,7 @@ interface ChartXAxisProps extends NodeProps {
 export class ChartXAxis extends Node {
   @signal()
   public declare readonly length: SimpleSignal<number, this>;
+  @initial(1)
   @signal()
   public declare readonly progress: SimpleSignal<number, this>;
   @signal()
@@ -296,13 +298,14 @@ export class ChartXTick extends Node {
 
 interface ChartYAxisProps extends NodeProps {
   length: SignalValue<number>;
-  progress: SignalValue<number>;
+  progress?: SignalValue<number>;
   label: SignalValue<string>;
 }
 
 export class ChartYAxis extends Node {
   @signal()
   public declare readonly length: SimpleSignal<number, this>;
+  @initial(1)
   @signal()
   public declare readonly progress: SimpleSignal<number, this>;
   @signal()
