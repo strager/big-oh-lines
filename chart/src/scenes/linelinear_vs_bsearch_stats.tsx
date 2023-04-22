@@ -58,6 +58,7 @@ function* generateScene(name, view) {
     let zoomS = createSignal(0);
     let xS = createSignal(0);
     let bigtickS = createSignal(0);
+    let logProgressS = createSignal(0);
     view.add(<Node position={center}>
       <ChartXAxis
         position={chartPosition}
@@ -92,6 +93,23 @@ function* generateScene(name, view) {
         labelMinY={-20}
         color={colors.yellow}
       />
+      <ChartSeries
+        position={chartPosition}
+        points={createSignal(() => {
+          let points = [];
+          let fakeSample = {text_lines: 0, comparisons: 0};
+          for (let lines = 1; lines < maxSampleX; lines += 1) {
+            fakeSample.text_lines = lines;
+            fakeSample.comparisons = Math.log(lines) / Math.log(2);
+            points.push([getX(fakeSample), getY(fakeSample)]);
+          }
+          return points;
+        })}
+        xProgress={createSignal(() => logProgressS() * maxX)}
+        labelProgress={createSignal(() => logProgressS() / 0.02)}
+        label={'log_2(lines)'}
+        color={colors.yellow}
+      />
     </Node>);
 
     yield *waitFor(1 / fps);
@@ -122,10 +140,20 @@ function* generateScene(name, view) {
       }
     }
     bigtickS(1);
+
+    if (name === 'linelinear_vs_bsearch_stats.log') {
+      let duration = 3;
+      for (let i = 0; i <= duration * fps; ++i) {
+        logProgressS(ease.easeInExpo(ease.easeOutCubic(i / (duration * fps))));
+        yield *waitFor(1 / fps);
+      }
+    }
+    logProgressS(1);
 }
 
 export let scenes = [
   makeSubscene('linelinear_vs_bsearch_stats.data'),
   makeSubscene('linelinear_vs_bsearch_stats.zoom'),
   makeSubscene('linelinear_vs_bsearch_stats.bigticks'),
+  makeSubscene('linelinear_vs_bsearch_stats.log'),
 ];
