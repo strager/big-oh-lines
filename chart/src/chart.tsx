@@ -19,6 +19,7 @@ export let colors = {
     blue: 'rgb(91, 155, 132)',
     light_green: 'rgb(168, 208, 141)',
     light_orange: 'rgb(244, 177, 131)',
+    light_yellow: 'rgb(255, 217, 101)',
 };
 
 export function computeChartStuff(view) {

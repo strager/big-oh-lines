@@ -59,6 +59,7 @@ function* generateScene(name, view) {
     let xS = createSignal(0);
     let bigtickS = createSignal(0);
     let logProgressS = createSignal(0);
+    let logRoundS = createSignal(0);
     view.add(<Node position={center}>
       <ChartXAxis
         position={chartPosition}
@@ -96,11 +97,14 @@ function* generateScene(name, view) {
       <ChartSeries
         position={chartPosition}
         points={createSignal(() => {
+          let logRound = logRoundS();
           let points = [];
           let fakeSample = {text_lines: 0, comparisons: 0};
           for (let lines = 1; lines < maxSampleX; lines += 1) {
             fakeSample.text_lines = lines;
-            fakeSample.comparisons = Math.log(lines) / Math.log(2);
+            let trueComparisons = Math.log(lines+1) / Math.log(2);
+            let roundedComparisons = Math.ceil(trueComparisons);
+            fakeSample.comparisons = logRound*roundedComparisons + (1-logRound)*trueComparisons;
             points.push([getX(fakeSample), getY(fakeSample)]);
           }
           return points;
@@ -108,7 +112,8 @@ function* generateScene(name, view) {
         xProgress={createSignal(() => logProgressS() * maxX)}
         labelProgress={createSignal(() => logProgressS() / 0.02)}
         label={'log_2(lines)'}
-        color={colors.yellow}
+        labelMaxY={-(chartHeight - 50)}
+        color={colors.light_yellow}
       />
     </Node>);
 
@@ -149,6 +154,15 @@ function* generateScene(name, view) {
       }
     }
     logProgressS(1);
+
+    if (name === 'linelinear_vs_bsearch_stats.loground') {
+      let duration = 3;
+      for (let i = 0; i <= duration * fps; ++i) {
+        logRoundS(ease.easeInOutCubic(i / (duration * fps)));
+        yield *waitFor(1 / fps);
+      }
+    }
+    logRoundS(1);
 }
 
 export let scenes = [
@@ -156,4 +170,5 @@ export let scenes = [
   makeSubscene('linelinear_vs_bsearch_stats.zoom'),
   makeSubscene('linelinear_vs_bsearch_stats.bigticks'),
   makeSubscene('linelinear_vs_bsearch_stats.log'),
+  makeSubscene('linelinear_vs_bsearch_stats.loground'),
 ];
