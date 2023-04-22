@@ -6,12 +6,16 @@ fn benchmark(c: &mut criterion::Criterion) {
     let imps: Vec<Implementation> = load_implementations();
     for imp in imps {
         c.bench_function(imp.name, |b: &mut criterion::Bencher| {
-            let text: &[u8] = b"hello\nworld\n\nlast line";
-            let mut bol: BOL = imp.create(text);
+            let line_count = 200;
+            let text: Vec<u8> = generate_realisticish_text(line_count);
+            let offsets: Vec<usize> = generate_uniform_offsets(&text, 500);
+            let mut bol: BOL = imp.create(&text);
             b.iter(|| {
-                let offset: usize = criterion::black_box(9);
-                let line: usize = bol.offset_to_line(offset);
-                criterion::black_box(line);
+                for &offset in &offsets {
+                    let offset: usize = criterion::black_box(offset);
+                    let line: usize = bol.offset_to_line(offset);
+                    criterion::black_box(line);
+                }
             });
         });
     }
