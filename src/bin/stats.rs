@@ -20,6 +20,9 @@ pub fn main() {
         "linelinear_stats_len_small" => {
             linelinear_stats_len_small(&mut out, &imps);
         }
+        "linelinear_vs_bsearch_stats" => {
+            linelinear_vs_bsearch_stats(&mut out, &imps);
+        }
         _ => {
             eprintln!("error: unknown scenario: {scenario_name}");
         }
@@ -73,6 +76,28 @@ pub fn linelinear_stats_len_small(out: &mut impl Write, imps: &[Implementation])
     }
 }
 
+pub fn linelinear_vs_bsearch_stats(out: &mut impl Write, imps: &[Implementation]) {
+    let mut line_counts: Vec<usize> = geomspace(1.0, 300.0, 1000)
+        .map(|raw_line_count: f64| raw_line_count as usize)
+        .collect();
+    line_counts.dedup();
+
+    for imp in imps {
+        if !(imp.name == "bol_linelinear" || imp.name == "bol_bsearch") {
+            continue;
+        }
+        for &line_count in &line_counts {
+            let text: Vec<u8> = generate_realisticish_text(line_count);
+            test_max_stats(out, &format!(
+                "\"text_type\": \"realisticish\",\n\"text_lines\": {},\n\"text_bytes\": {},\n\"lookup_type\": \"at end\",\n\"lookups\": 1",
+                count_lines(&text),
+                text.len(),
+            ),
+                &text, imp);
+        }
+    }
+}
+
 fn test(
     out: &mut impl Write,
     metadata_json: &str,
@@ -94,6 +119,36 @@ fn test(
     write!(out, "\"imp\": \"{}\",\n", imp.name);
     write!(out, "\"memory\": {},\n", stats.memory);
     write!(out, "\"comparisons\": {}\n", stats.comparisons);
+    write!(out, "}}\n");
+    unsafe {
+        NEED_COMMA = true;
+    }
+}
+
+fn test_max_stats(
+    out: &mut impl Write,
+    metadata_json: &str,
+    text: &[u8],
+    imp: &Implementation,
+) {
+    let mut max_stats: BOLStats = BOLStats { comparisons: 0, memory: 0 };
+    for offset in 0..text.len() {
+        let mut bol: BOL = imp.create(text);
+        bol.offset_to_line(offset);
+        let stats: BOLStats = bol.stats();
+        if stats.comparisons > max_stats.comparisons {
+            max_stats = stats;
+        }
+    }
+
+    if unsafe { NEED_COMMA } {
+        write!(out, ",\n");
+    }
+    write!(out, "{{\n");
+    write!(out, "{},\n", metadata_json);
+    write!(out, "\"imp\": \"{}\",\n", imp.name);
+    write!(out, "\"memory\": {},\n", max_stats.memory);
+    write!(out, "\"comparisons\": {}\n", max_stats.comparisons);
     write!(out, "}}\n");
     unsafe {
         NEED_COMMA = true;

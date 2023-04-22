@@ -52,6 +52,21 @@ export function mergeSamplesMin(rawSamples) {
   return samples;
 }
 
+export function mergeSamplesMax(rawSamples) {
+  let samples = [];
+  for (let sample of rawSamples) {
+    if (samples.length > 0 && samples.at(-1).text_bytes === sample.text_bytes) {
+      // Pick the highest sample at a given text_bytes.
+      if (sample.comparisons > samples.at(-1).comparisons) {
+        samples[samples.length - 1] = sample;
+      }
+    } else {
+      samples.push(sample)
+    }
+  }
+  return samples;
+}
+
 interface ChartSeriesProps extends NodeProps {
   points: SignalValue<[number, number][]>;
   xProgress: SignalValue<number>;
