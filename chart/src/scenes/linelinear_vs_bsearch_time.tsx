@@ -23,8 +23,9 @@ function sortSample(a, b) {
 let linelinearSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_linelinear').sort(sortSample));
 let linelinearSIMDSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_linelinearsimd').sort(sortSample));
 let bsearchSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_bsearch').sort(sortSample));
+let bsearch2Samples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_bsearch2').sort(sortSample));
 
-let maxSampleY = Math.max(...[...linelinearSamples, ...linelinearSIMDSamples, ...bsearchSamples].map((sample) => sample.duration_ns));
+let maxSampleY = Math.max(...linelinearSamples.map((sample) => sample.duration_ns));
 
 function makeSubscene(name) {
   let scene = makeScene2D(function (view) { return generateScene(name, view); });
@@ -96,6 +97,14 @@ function* generateScene(name, view) {
         label={'binary search'}
         labelMinY={-60}
         color={colors.orange}
+      />
+      <ChartSeries
+        position={chartPosition}
+        points={createSignal(() => bsearch2Samples.map((sample) => [getX(sample), getY(sample)]))}
+        xProgress={xS}
+        label={'binary search 2'}
+        labelMinY={-60}
+        color={colors.light_orange}
       />
     </Node>);
 

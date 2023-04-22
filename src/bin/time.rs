@@ -129,7 +129,7 @@ pub fn linelinear_vs_bsearch_time(out: &mut impl Write, imps: &[Implementation])
     line_counts.dedup();
 
     for imp in imps {
-        if !(imp.name == "bol_linelinearsimd" || imp.name == "bol_linelinear" || imp.name == "bol_bsearch") {
+        if !(imp.name == "bol_linelinearsimd" || imp.name == "bol_linelinear" || imp.name == "bol_bsearch" || imp.name == "bol_bsearch2") {
             continue;
         }
         for &line_count in &line_counts {

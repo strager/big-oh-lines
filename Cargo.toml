@@ -6,6 +6,7 @@ edition = "2021"
 [workspace]
 members = [
     "bol_bsearch",
+    "bol_bsearch2",
     "bol_btree",
     "bol_linear",
     "bol_linearfancy",
@@ -25,6 +26,7 @@ rand_pcg = { version = "0.3.1", default-features = false }
 [dependencies]
 bol_base = { workspace = true }
 bol_bsearch = { path = "bol_bsearch" }
+bol_bsearch2 = { path = "bol_bsearch2" }
 bol_btree = { path = "bol_btree" }
 bol_linear = { path = "bol_linear" }
 bol_linearfancy = { path = "bol_linearfancy" }
@@ -57,6 +59,7 @@ test = true
 default = []
 bol_stats = [
     "bol_base/bol_stats",
+    "bol_bsearch2/bol_stats",
     "bol_bsearch/bol_stats",
     "bol_btree/bol_stats",
     "bol_linear/bol_stats",
