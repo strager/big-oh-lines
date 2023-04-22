@@ -14,8 +14,14 @@ import {waitFor, waitUntil} from '@motion-canvas/core/lib/flow';
 import {ChartSeries, ChartXAxis, ChartYAxis, computeChartStuff, mergeSamplesMin, colors} from '../chart.tsx';
 import {ValueDispatcher} from '@motion-canvas/core/lib/events';
 
-let linelinearSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_linelinear'));
-let bsearchSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_bsearch'));
+function sortSample(a, b) {
+  if (a.text_lines < b.text_lines) return -1;
+  if (a.text_lines > b.text_lines) return +1;
+  return 0;
+}
+
+let linelinearSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_linelinear').sort(sortSample));
+let bsearchSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_bsearch').sort(sortSample));
 
 let maxSampleY = Math.max(...[...linelinearSamples, ...bsearchSamples].map((sample) => sample.duration_ns));
 
@@ -30,27 +36,35 @@ function* generateScene(name, view) {
     let {chartWidth, chartHeight, chartPosition, chartInnerPadding, chartOuterPadding, center, fps} = computeChartStuff(view);
 
     let xTicks = [
+      [16, '16'],
+      [30, '30'],
       [1000, '1000'],
     ];
 
     let maxSampleX = Math.max(...data.map((sample) => sample.text_lines));
     let maxTickX = Math.max(...xTicks.map(([sampleX, _label]) => sampleX));
-    let xSampleToScreen = (chartWidth - 200) / Math.max(maxSampleX, maxTickX);
+    let xSampleToScreenOrig = (chartWidth - 200) / Math.max(maxSampleX, maxTickX);
+    let xSampleToScreenZoomed = (chartWidth - 200) / 30;
+    let xSampleToScreenS = createSignal(() => (1-zoomS())*xSampleToScreenOrig + zoomS()*xSampleToScreenZoomed);
     function getX(sample) {
-        return xSampleToScreen * sample.text_lines;
+        return xSampleToScreenS() * sample.text_lines;
     }
-    let maxX = maxSampleX * xSampleToScreen;
+    let maxX = maxSampleX * xSampleToScreenOrig;
 
+    let zoomedSampleY = 2000;
     function getY(sample) {
-      return -(chartHeight * sample.duration_ns / maxSampleY);
+      let zoom = zoomS();
+      let scale = zoom*(1/zoomedSampleY) + (1-zoom)*(1/maxSampleY);
+      return -(chartHeight * sample.duration_ns * scale);
     }
 
     let xS = createSignal(0);
+    let zoomS = createSignal(0);
     view.add(<Node position={center}>
       <ChartXAxis
         position={chartPosition}
         length={chartWidth + chartInnerPadding.right}
-        ticks={xTicks.map(([sampleX, label]) => [sampleX * xSampleToScreen, label])}
+        ticks={createSignal(() => xTicks.map(([sampleX, label]) => [sampleX * xSampleToScreenS(), label]))}
         label="lines"
       />
       <ChartYAxis
@@ -60,7 +74,7 @@ function* generateScene(name, view) {
       />
       <ChartSeries
         position={chartPosition}
-        points={linelinearSamples.map((sample) => [getX(sample), getY(sample)])}
+        points={createSignal(() => linelinearSamples.map((sample) => [getX(sample), getY(sample)]))}
         xProgress={xS}
         labelMinY={-20}
         label={'optimized'}
@@ -68,7 +82,7 @@ function* generateScene(name, view) {
       />
       <ChartSeries
         position={chartPosition}
-        points={bsearchSamples.map((sample) => [getX(sample), getY(sample)])}
+        points={createSignal(() => bsearchSamples.map((sample) => [getX(sample), getY(sample)]))}
         xProgress={xS}
         label={'binary search'}
         labelMinY={-60}
@@ -86,8 +100,19 @@ function* generateScene(name, view) {
       }
     }
     xS(maxX);
+
+    if (name === 'linelinear_vs_bsearch_time.zoom') {
+      let zoomDuration = 4;
+      for (let i = 0; i <= zoomDuration * fps; ++i) {
+        zoomS(ease.easeInOutCubic(i / (zoomDuration * fps)));
+        yield *waitFor(1 / fps);
+      }
+    }
+    zoomS(1);
+
 }
 
 export let scenes = [
   makeSubscene('linelinear_vs_bsearch_time.data'),
+  makeSubscene('linelinear_vs_bsearch_time.zoom'),
 ];
