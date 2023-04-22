@@ -21,9 +21,10 @@ function sortSample(a, b) {
 }
 
 let linelinearSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_linelinear').sort(sortSample));
+let linelinearSIMDSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_linelinearsimd').sort(sortSample));
 let bsearchSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_bsearch').sort(sortSample));
 
-let maxSampleY = Math.max(...[...linelinearSamples, ...bsearchSamples].map((sample) => sample.duration_ns));
+let maxSampleY = Math.max(...[...linelinearSamples, ...linelinearSIMDSamples, ...bsearchSamples].map((sample) => sample.duration_ns));
 
 function makeSubscene(name) {
   let scene = makeScene2D(function (view) { return generateScene(name, view); });
@@ -36,22 +37,22 @@ function* generateScene(name, view) {
     let {chartWidth, chartHeight, chartPosition, chartInnerPadding, chartOuterPadding, center, fps} = computeChartStuff(view);
 
     let xTicks = [
-      [16, '16'],
-      [30, '30'],
+      [100, '100'],
+      [200, '200'],
       [1000, '1000'],
     ];
 
     let maxSampleX = Math.max(...data.map((sample) => sample.text_lines));
     let maxTickX = Math.max(...xTicks.map(([sampleX, _label]) => sampleX));
     let xSampleToScreenOrig = (chartWidth - 200) / Math.max(maxSampleX, maxTickX);
-    let xSampleToScreenZoomed = (chartWidth - 200) / 30;
+    let xSampleToScreenZoomed = (chartWidth - 200) / 200;
     let xSampleToScreenS = createSignal(() => (1-zoomS())*xSampleToScreenOrig + zoomS()*xSampleToScreenZoomed);
     function getX(sample) {
         return xSampleToScreenS() * sample.text_lines;
     }
     let maxX = maxSampleX * xSampleToScreenOrig;
 
-    let zoomedSampleY = 2000;
+    let zoomedSampleY = 8000;
     function getY(sample) {
       let zoom = zoomS();
       let scale = zoom*(1/zoomedSampleY) + (1-zoom)*(1/maxSampleY);
@@ -79,6 +80,14 @@ function* generateScene(name, view) {
         labelMinY={-20}
         label={'optimized'}
         color={colors.green}
+      />
+      <ChartSeries
+        position={chartPosition}
+        points={createSignal(() => linelinearSIMDSamples.map((sample) => [getX(sample), getY(sample)]))}
+        xProgress={xS}
+        labelMinY={-20}
+        label={'opt SIMD'}
+        color={colors.light_green}
       />
       <ChartSeries
         position={chartPosition}

@@ -128,25 +128,21 @@ pub fn linelinear_vs_bsearch_time(out: &mut impl Write, imps: &[Implementation])
         .collect();
     line_counts.dedup();
 
-    for _ in 0..2 {
-        for imp in imps {
-            if !(imp.name == "bol_linelinear" || imp.name == "bol_bsearch") {
-                continue;
-            }
-            for &line_count in &line_counts {
-                let text: Vec<u8> = generate_realisticish_text(line_count);
-                let offsets: Vec<usize> = if imp.name == "bol_bsearch" {
-                    generate_uniform_offsets(&text, TEST_MAX_TIME_LOOKUPS)
-                } else {
-                    vec![text.len() - 1; TEST_MAX_TIME_LOOKUPS]
-                };
-                test_max_time(out, &format!(
-                        "\"text_type\": \"realisticish\",\n\"text_lines\": {},\n\"text_bytes\": {},\n\"lookup_type\": \"exhaustive\",\n\"lookups\": {}",
-                        count_lines(&text),
-                        text.len(),
-                        TEST_MAX_TIME_LOOKUPS * TEST_MAX_TIME_BOLS,
+    for imp in imps {
+        if !(imp.name == "bol_linelinearsimd" || imp.name == "bol_linelinear" || imp.name == "bol_bsearch") {
+            continue;
+        }
+        for &line_count in &line_counts {
+            let text: Vec<u8> = generate_realisticish_text(line_count);
+            let offsets: Vec<usize> = generate_uniform_offsets(&text, 500);
+            for _ in 0..5 {
+                test(out, &format!(
+                    "\"text_type\": \"realisticish\",\n\"text_lines\": {},\n\"text_bytes\": {},\n\"lookup_type\": \"exhaustive\",\n\"lookups\": {}",
+                    count_lines(&text),
+                    text.len(),
+                    offsets.len(),
                 ),
-                &text, &offsets, &imp);
+                    &text, &offsets, &imp);
             }
         }
     }
@@ -173,52 +169,6 @@ fn test(
     write!(out, "{},\n", metadata_json);
     write!(out, "\"imp\": \"{}\",\n", imp.name);
     write!(out, "\"duration_ns\": {}\n", duration.as_nanos());
-    write!(out, "}}\n");
-    unsafe {
-        NEED_COMMA = true;
-    }
-}
-
-const TEST_MAX_TIME_LOOKUPS: usize = 50;
-const TEST_MAX_TIME_BOLS: usize = 200;
-const TEST_MAX_TIME_ITERATIONS: usize = 5;
-
-fn test_max_time(
-    out: &mut impl Write,
-    metadata_json: &str,
-    text: &[u8],
-    offsets: &[usize],
-    imp: &Implementation,
-) {
-    let mut max_duration: std::time::Duration = std::time::Duration::ZERO;
-    let mut bols: Vec<BOL> = vec![];
-    for _ in 0..TEST_MAX_TIME_BOLS {
-        bols.push(imp.create(text));
-    }
-    for &offset in offsets {
-        let mut this_offset_min_duration: std::time::Duration = std::time::Duration::from_secs(999);
-        for _ in 0..TEST_MAX_TIME_ITERATIONS {
-            let start: std::time::Instant = std::time::Instant::now();
-            for bol in &mut bols {
-                bol.offset_to_line(offset);
-            }
-            let duration: std::time::Duration = start.elapsed();
-            if duration < this_offset_min_duration {
-                this_offset_min_duration = duration;
-            }
-        }
-        if this_offset_min_duration > max_duration {
-            max_duration = this_offset_min_duration;
-        }
-    }
-
-    if unsafe { NEED_COMMA } {
-        write!(out, ",\n");
-    }
-    write!(out, "{{\n");
-    write!(out, "{},\n", metadata_json);
-    write!(out, "\"imp\": \"{}\",\n", imp.name);
-    write!(out, "\"duration_ns\": {}\n", max_duration.as_nanos());
     write!(out, "}}\n");
     unsafe {
         NEED_COMMA = true;
