@@ -190,6 +190,7 @@ interface ChartXAxisProps extends NodeProps {
   progress: SignalValue<number>;
   label: SignalValue<string>;
   ticks?: SignalValue<[number, string][]>;
+  tickHeights?: SignalValue<number>;
 }
 
 export class ChartXAxis extends Node {
@@ -202,6 +203,9 @@ export class ChartXAxis extends Node {
   @initial([])
   @signal()
   public declare readonly ticks: SimpleSignal<[number, string][], this>;
+  @initial(20)
+  @signal()
+  public declare readonly tickHeights: SimpleSignal<number, this>;
 
   public constructor(props?: CharXAxisProps) {
     super({...props});
@@ -231,6 +235,7 @@ export class ChartXAxis extends Node {
         label={tickLabel}
         lineOpacity={createSignal(() => this.length() * this.progress() >= tickX ? 1 : 0)}
         labelOpacity={this.progress}
+        tickHeight={this.tickHeights}
       />
     )} />);
   }
@@ -243,6 +248,7 @@ interface ChartXTickProps extends NodeProps {
   labelOpacity?: SignalValue<number>;
   labelOffsetY?: SignalValue<number>;
   color?: SignalValue<PossibleColor>;
+  tickHeight?: SignalValue<number>;
 }
 
 export class ChartXTick extends Node {
@@ -262,13 +268,16 @@ export class ChartXTick extends Node {
   @initial('#bbb')
   @colorSignal()
   public declare readonly color: ColorSignal<this>;
+  @initial(20)
+  @signal()
+  public declare readonly tickHeight: SimpleSignal<number, this>;
 
   public constructor(props?: CharXAxisProps) {
     super({...props});
 
     this.add(<Line
         lineWidth={2}
-        points={createSignal(() => [[this.tickX(), 10], [this.tickX(), -10]])}
+        points={createSignal(() => [[this.tickX(), 10 - this.tickHeight()], [this.tickX(), 10]])}
         stroke={this.color}
         opacity={this.lineOpacity}
     />);

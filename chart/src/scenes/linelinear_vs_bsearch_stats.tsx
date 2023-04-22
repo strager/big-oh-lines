@@ -57,6 +57,7 @@ function* generateScene(name, view) {
 
     let zoomS = createSignal(0);
     let xS = createSignal(0);
+    let bigtickS = createSignal(0);
     view.add(<Node position={center}>
       <ChartXAxis
         position={chartPosition}
@@ -64,6 +65,7 @@ function* generateScene(name, view) {
         length={chartWidth + chartInnerPadding.right}
         ticks={xTicks.map(([sampleX, label]) => [sampleX * xSampleToScreen, label])}
         label="lines"
+        tickHeights={createSignal(() => 20*(1-bigtickS()) + (chartHeight + chartInnerPadding.top + 10)*bigtickS())}
       />
       <ChartYAxis
         position={chartPosition}
@@ -111,9 +113,19 @@ function* generateScene(name, view) {
       }
     }
     zoomS(1);
+
+    if (name === 'linelinear_vs_bsearch_stats.bigticks') {
+      let duration = 1.5;
+      for (let i = 0; i <= duration * fps; ++i) {
+        bigtickS(ease.easeInOutExpo(i / (duration * fps)));
+        yield *waitFor(1 / fps);
+      }
+    }
+    bigtickS(1);
 }
 
 export let scenes = [
   makeSubscene('linelinear_vs_bsearch_stats.data'),
   makeSubscene('linelinear_vs_bsearch_stats.zoom'),
+  makeSubscene('linelinear_vs_bsearch_stats.bigticks'),
 ];
