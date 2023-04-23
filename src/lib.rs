@@ -4,6 +4,7 @@ use bol_base::*;
 const IMPLEMENTATION_NAMES: &[&'static str] = &[
     "bol_bsearch",
     "bol_bsearch2",
+    "bol_bsearch4",
     "bol_btree",
     "bol_linear",
     "bol_linearfancy",
