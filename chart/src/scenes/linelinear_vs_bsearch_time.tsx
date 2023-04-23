@@ -24,6 +24,8 @@ let linelinearSamples = mergeSamplesMin(data.filter((sample) => sample.imp === '
 let linelinearSIMDSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_linelinearsimd').sort(sortSample));
 let bsearchSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_bsearch').sort(sortSample));
 let bsearch2Samples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_bsearch2').sort(sortSample));
+let bsearch4Samples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_bsearch4').sort(sortSample));
+let bsearch5Samples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_bsearch5').sort(sortSample));
 
 let maxSampleY = Math.max(...linelinearSamples.map((sample) => sample.duration_ns));
 
@@ -103,6 +105,22 @@ function* generateScene(name, view) {
         points={createSignal(() => bsearch2Samples.map((sample) => [getX(sample), getY(sample)]))}
         xProgress={xS}
         label={'binary search 2'}
+        labelMinY={-60}
+        color={colors.light_orange}
+      />
+      <ChartSeries
+        position={chartPosition}
+        points={createSignal(() => bsearch4Samples.map((sample) => [getX(sample), getY(sample)]))}
+        xProgress={xS}
+        label={'binary search 4'}
+        labelMinY={-60}
+        color={colors.light_orange}
+      />
+      <ChartSeries
+        position={chartPosition}
+        points={createSignal(() => bsearch5Samples.map((sample) => [getX(sample), getY(sample)]))}
+        xProgress={xS}
+        label={'binary search 5'}
         labelMinY={-60}
         color={colors.light_orange}
       />
