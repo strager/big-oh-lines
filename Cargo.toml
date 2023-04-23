@@ -8,6 +8,7 @@ members = [
     "bol_bsearch",
     "bol_bsearch2",
     "bol_bsearch4",
+    "bol_bsearch5",
     "bol_btree",
     "bol_linear",
     "bol_linearfancy",
@@ -29,6 +30,7 @@ bol_base = { workspace = true }
 bol_bsearch = { path = "bol_bsearch" }
 bol_bsearch2 = { path = "bol_bsearch2" }
 bol_bsearch4 = { path = "bol_bsearch4" }
+bol_bsearch5 = { path = "bol_bsearch5" }
 bol_btree = { path = "bol_btree" }
 bol_linear = { path = "bol_linear" }
 bol_linearfancy = { path = "bol_linearfancy" }
@@ -63,6 +65,7 @@ bol_stats = [
     "bol_base/bol_stats",
     "bol_bsearch2/bol_stats",
     "bol_bsearch4/bol_stats",
+    "bol_bsearch5/bol_stats",
     "bol_bsearch/bol_stats",
     "bol_btree/bol_stats",
     "bol_linear/bol_stats",
