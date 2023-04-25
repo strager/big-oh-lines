@@ -21,11 +21,7 @@ function sortSample(a, b) {
 }
 
 let linelinearSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_linelinear').sort(sortSample));
-let linelinearSIMDSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_linelinearsimd').sort(sortSample));
 let bsearchSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_bsearch').sort(sortSample));
-let bsearch2Samples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_bsearch2').sort(sortSample));
-let bsearch4Samples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_bsearch4').sort(sortSample));
-let bsearch5Samples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_bsearch5').sort(sortSample));
 
 let maxSampleY = Math.max(...linelinearSamples.map((sample) => sample.duration_ns));
 
@@ -40,6 +36,7 @@ function* generateScene(name, view) {
     let {chartWidth, chartHeight, chartPosition, chartInnerPadding, chartOuterPadding, center, fps} = computeChartStuff(view);
 
     let xTicks = [
+      [50, '50'],
       [100, '100'],
       [200, '200'],
       [1000, '1000'],
@@ -48,7 +45,7 @@ function* generateScene(name, view) {
     let maxSampleX = Math.max(...data.map((sample) => sample.text_lines));
     let maxTickX = Math.max(...xTicks.map(([sampleX, _label]) => sampleX));
     let xSampleToScreenOrig = (chartWidth - 200) / Math.max(maxSampleX, maxTickX);
-    let xSampleToScreenZoomed = (chartWidth - 200) / 200;
+    let xSampleToScreenZoomed = (chartWidth - 200) / 50;
     let xSampleToScreenS = createSignal(() => (1-zoomS())*xSampleToScreenOrig + zoomS()*xSampleToScreenZoomed);
     function getX(sample) {
         return xSampleToScreenS() * sample.text_lines;
@@ -86,43 +83,11 @@ function* generateScene(name, view) {
       />
       <ChartSeries
         position={chartPosition}
-        points={createSignal(() => linelinearSIMDSamples.map((sample) => [getX(sample), getY(sample)]))}
-        xProgress={xS}
-        labelMinY={-20}
-        label={'opt SIMD'}
-        color={colors.light_green}
-      />
-      <ChartSeries
-        position={chartPosition}
         points={createSignal(() => bsearchSamples.map((sample) => [getX(sample), getY(sample)]))}
         xProgress={xS}
         label={'binary search'}
         labelMinY={-60}
         color={colors.orange}
-      />
-      <ChartSeries
-        position={chartPosition}
-        points={createSignal(() => bsearch2Samples.map((sample) => [getX(sample), getY(sample)]))}
-        xProgress={xS}
-        label={'binary search 2'}
-        labelMinY={-60}
-        color={colors.light_orange}
-      />
-      <ChartSeries
-        position={chartPosition}
-        points={createSignal(() => bsearch4Samples.map((sample) => [getX(sample), getY(sample)]))}
-        xProgress={xS}
-        label={'binary search 4'}
-        labelMinY={-60}
-        color={colors.light_orange}
-      />
-      <ChartSeries
-        position={chartPosition}
-        points={createSignal(() => bsearch5Samples.map((sample) => [getX(sample), getY(sample)]))}
-        xProgress={xS}
-        label={'binary search 5'}
-        labelMinY={-60}
-        color={colors.light_orange}
       />
     </Node>);
 
