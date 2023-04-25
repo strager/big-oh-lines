@@ -82,7 +82,7 @@ function* generateScene(name, view) {
         position={chartPosition}
         points={createSignal(() => linelinearSamples.map((sample) => [getX(sample), getY(sample)]))}
         xProgress={xS}
-        labelMinY={-20}
+        labelMinY={-60}
         label={'optimized'}
         color={colors.green}
       />
@@ -100,7 +100,7 @@ function* generateScene(name, view) {
         points={createSignal(() => bsearchSamples.map((sample) => [getX(sample), getY(sample)]))}
         xProgress={xS}
         label={'binary search'}
-        labelMinY={-60}
+        labelMinY={-20}
         color={colors.orange}
       />
     </Node>);
