@@ -21,6 +21,7 @@ function sortSample(a, b) {
 }
 
 let linelinearSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_linelinear').sort(sortSample));
+let linelinearSIMDSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_linelinearsimd').sort(sortSample));
 let bsearchSamples = mergeSamplesMin(data.filter((sample) => sample.imp === 'bol_bsearch').sort(sortSample));
 
 let maxSampleY = Math.max(...linelinearSamples.map((sample) => sample.duration_ns));
@@ -39,13 +40,16 @@ function* generateScene(name, view) {
       [50, '50'],
       [100, '100'],
       [200, '200'],
+      [400, '400'],
+      [800, '800'],
       [1000, '1000'],
     ];
 
     let maxSampleX = Math.max(...data.map((sample) => sample.text_lines));
     let maxTickX = Math.max(...xTicks.map(([sampleX, _label]) => sampleX));
     let xSampleToScreenOrig = (chartWidth - 200) / Math.max(maxSampleX, maxTickX);
-    let xSampleToScreenZoomed = (chartWidth - 200) / 50;
+    let zoomedWidth = 50;
+    let xSampleToScreenZoomed = (chartWidth - 240) / zoomedWidth;
     let xSampleToScreenS = createSignal(() => (1-zoomS())*xSampleToScreenOrig + zoomS()*xSampleToScreenZoomed);
     function getX(sample) {
         return xSampleToScreenS() * sample.text_lines;
@@ -61,6 +65,7 @@ function* generateScene(name, view) {
 
     let xS = createSignal(0);
     let zoomS = createSignal(0);
+    let simdS = createSignal(0);
     view.add(<Node position={center}>
       <ChartXAxis
         position={chartPosition}
@@ -80,6 +85,15 @@ function* generateScene(name, view) {
         labelMinY={-20}
         label={'optimized'}
         color={colors.green}
+      />
+      <ChartSeries
+        position={chartPosition}
+        points={createSignal(() => linelinearSIMDSamples.map((sample) => [getX(sample), getY(sample)]))}
+        xProgress={createSignal(() => simdS() * zoomedWidth * xSampleToScreenZoomed)}
+        labelMinY={-20}
+        label={'optimized SIMD'}
+        labelProgress={createSignal(() => simdS() * 8)}
+        color={colors.light_green}
       />
       <ChartSeries
         position={chartPosition}
@@ -111,9 +125,28 @@ function* generateScene(name, view) {
     }
     zoomS(1);
 
+    if (name === 'linelinear_vs_bsearch_time.simd') {
+      let simdDuration = 2;
+      for (let i = 0; i <= simdDuration * fps; ++i) {
+        simdS(ease.easeInOutCubic(i / (simdDuration * fps)));
+        yield *waitFor(1 / fps);
+      }
+    }
+    simdS(1);
+
+    if (name === 'linelinear_vs_bsearch_time.unzoom') {
+      let zoomDuration = 4;
+      for (let i = 0; i <= zoomDuration * fps; ++i) {
+        zoomS(ease.easeInOutCubic(1 - i / (zoomDuration * fps)));
+        yield *waitFor(1 / fps);
+      }
+    }
+    zoomS(0);
 }
 
 export let scenes = [
   makeSubscene('linelinear_vs_bsearch_time.data'),
   makeSubscene('linelinear_vs_bsearch_time.zoom'),
+  makeSubscene('linelinear_vs_bsearch_time.simd'),
+  makeSubscene('linelinear_vs_bsearch_time.unzoom'),
 ];
