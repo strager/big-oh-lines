@@ -71,9 +71,9 @@ function* generateScene(name, view) {
         points={createSignal(() => lineLinearSamples.map((sample) => [getX(sample), getY(sample)]))}
         xProgress={xS}
         labelProgress={1}
-        label={'optimized'}
+        label={'line table'}
         labelMinY={-20}
-        color={colors.blue}
+        color={colors.light_blue}
       />
       <ChartSeries
         position={chartPosition}

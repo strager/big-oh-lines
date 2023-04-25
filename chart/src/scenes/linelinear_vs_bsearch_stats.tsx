@@ -92,9 +92,9 @@ function* generateScene(name, view) {
         points={linelinearSamples.map((sample) => [getX(sample), getY(sample)])}
         xProgress={xS}
         labelProgress={1}
-        label={'optimized'}
+        label={'line table'}
         labelMinY={createSignal(() => -65*(1-zoomS()) + -(chartHeight+50)*zoomS())}
-        color={colors.blue}
+        color={colors.light_blue}
         opacity={createSignal(() => 1 - zoomS()*0.5)}
       />
       <ChartSeries

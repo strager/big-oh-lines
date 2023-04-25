@@ -146,7 +146,7 @@ function* generateScene(name, view) {
         labelProgress={1}
         label={''}
         labelMinY={-20}
-        color={colors.blue}
+        color={colors.light_blue}
       />
       <Node opacity={retickS} position={chartPosition}>
         {lineXTicks.map(([tickX, tickLabel]) =>

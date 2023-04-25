@@ -47,9 +47,10 @@ function* generateScene(name, view) {
 
     let maxSampleX = Math.max(...data.map((sample) => sample.text_lines));
     let maxTickX = Math.max(...xTicks.map(([sampleX, _label]) => sampleX));
-    let xSampleToScreenOrig = (chartWidth - 200) / Math.max(maxSampleX, maxTickX);
-    let zoomedWidth = 50;
-    let xSampleToScreenZoomed = (chartWidth - 240) / zoomedWidth;
+    let maxSXOrig = Math.max(maxSampleX, maxTickX);
+    let maxSXZoomed = 50;
+    let xSampleToScreenOrig = (chartWidth - 260) / maxSXOrig;
+    let xSampleToScreenZoomed = (chartWidth - 260) / maxSXZoomed;
     let xSampleToScreenS = createSignal(() => (1-zoomS())*xSampleToScreenOrig + zoomS()*xSampleToScreenZoomed);
     function getX(sample) {
         return xSampleToScreenS() * sample.text_lines;
@@ -83,17 +84,17 @@ function* generateScene(name, view) {
         points={createSignal(() => linelinearSamples.map((sample) => [getX(sample), getY(sample)]))}
         xProgress={xS}
         labelMinY={-60}
-        label={'optimized'}
-        color={colors.green}
+        label={'line table'}
+        color={colors.light_blue}
       />
       <ChartSeries
         position={chartPosition}
         points={createSignal(() => linelinearSIMDSamples.map((sample) => [getX(sample), getY(sample)]))}
-        xProgress={createSignal(() => simdS() * zoomedWidth * xSampleToScreenZoomed)}
+        xProgress={createSignal(() => simdS() >= 1 ? xS() : simdS() * maxSXZoomed * xSampleToScreenS())}
         labelMinY={-20}
-        label={'optimized SIMD'}
+        label={'line table (SIMD)'}
         labelProgress={createSignal(() => simdS() * 8)}
-        color={colors.light_green}
+        color={colors.green}
       />
       <ChartSeries
         position={chartPosition}
@@ -101,7 +102,7 @@ function* generateScene(name, view) {
         xProgress={xS}
         label={'binary search'}
         labelMinY={-20}
-        color={colors.orange}
+        color={colors.yellow}
       />
     </Node>);
 
