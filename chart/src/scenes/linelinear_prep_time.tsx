@@ -76,6 +76,31 @@ function* generateScene(name, view) {
         3: createSignal(0),
         2: createSignal(0),
     };
+    function linearChart(lookupCount) {
+      return <ChartSeries
+        position={chartPosition}
+        points={createSignal(() => sampleGroups.get('bol_linear').get(lookupCount).map((sample) => [getX(sample), getY(sample)]))}
+        xProgress={xSs[lookupCount]}
+        labelProgress={1}
+        label={`naïve (${lookupCount})`}
+        labelMinY={lookupCount === 1 ? -20 : -60}
+        labelProgress={labelProgressSs[lookupCount]}
+        color={colors.light_blue}
+      />;
+    }
+    function lineLinearChart(lookupCount) {
+      return <ChartSeries
+        position={chartPosition}
+        points={createSignal(() => sampleGroups.get('bol_linelinear').get(lookupCount).map((sample) => [getX(sample), getY(sample)]))}
+        xProgress={xSs[lookupCount]}
+        labelProgress={1}
+        label={`line table (${lookupCount})`}
+        labelMinY={createSignal(() => lookupCount === 1 ? -60 : (xSs[lookupCount]()/maxX)*-600 + -20)}
+        labelMaxY={lookupCount === 1 ? -520 : -9999}
+        labelProgress={labelProgressSs[lookupCount]}
+        color={colors.orange}
+      />;
+    }
     view.add(<Node position={center}>
       <ChartXAxis
         position={chartPosition}
@@ -90,29 +115,11 @@ function* generateScene(name, view) {
         length={chartHeight + chartInnerPadding.top}
         label={"preparation + algorithm time\n(lower is better)"}
       />
-      {[1, 3].map((lookupCount) =>
-          <ChartSeries
-            position={chartPosition}
-            points={createSignal(() => sampleGroups.get('bol_linelinear').get(lookupCount).map((sample) => [getX(sample), getY(sample)]))}
-            xProgress={xSs[lookupCount]}
-            labelProgress={1}
-            label={`line table (${lookupCount})`}
-            labelMinY={createSignal(() => lookupCount === 1 ? -60 : (xSs[lookupCount]()/maxX)*-600 + -20)}
-            labelMaxY={lookupCount === 1 ? -520 : -9999}
-            labelProgress={labelProgressSs[lookupCount]}
-            color={colors.orange}
-          />)}
-      {[...sampleGroups.get('bol_linear')].map(([lookupCount, samples]) =>
-          <ChartSeries
-            position={chartPosition}
-            points={createSignal(() => samples.map((sample) => [getX(sample), getY(sample)]))}
-            xProgress={xSs[lookupCount]}
-            labelProgress={1}
-            label={`naïve (${lookupCount})`}
-            labelMinY={lookupCount === 1 ? -20 : -60}
-            labelProgress={labelProgressSs[lookupCount]}
-            color={colors.light_blue}
-          />)}
+      {linearChart(1)}
+      {lineLinearChart(1)}
+      {linearChart(3)}
+      {lineLinearChart(3)}
+      {linearChart(2)}
     </Node>);
 
     yield *waitFor(1 / fps);
