@@ -14,6 +14,10 @@ members = [
     "bol_linearfancy",
     "bol_linelinear",
     "bol_linelinear8",
+    "bol_linelinear82",
+    "bol_linelinear83",
+    "bol_linelinear84",
+    "bol_linelinear85",
     "bol_linelinearsimd",
     "bol_table",
 ]
@@ -37,6 +41,10 @@ bol_linear = { path = "bol_linear" }
 bol_linearfancy = { path = "bol_linearfancy" }
 bol_linelinear = { path = "bol_linelinear" }
 bol_linelinear8 = { path = "bol_linelinear8" }
+bol_linelinear82 = { path = "bol_linelinear82" }
+bol_linelinear83 = { path = "bol_linelinear83" }
+bol_linelinear84 = { path = "bol_linelinear84" }
+bol_linelinear85 = { path = "bol_linelinear85" }
 bol_linelinearsimd = { path = "bol_linelinearsimd" }
 bol_table = { path = "bol_table" }
 criterion = { workspace = true }
@@ -74,6 +82,10 @@ bol_stats = [
     "bol_linearfancy/bol_stats",
     "bol_linelinear/bol_stats",
     "bol_linelinear8/bol_stats",
+    "bol_linelinear82/bol_stats",
+    "bol_linelinear83/bol_stats",
+    "bol_linelinear84/bol_stats",
+    "bol_linelinear85/bol_stats",
     "bol_linelinearsimd/bol_stats",
     "bol_table/bol_stats",
 ]

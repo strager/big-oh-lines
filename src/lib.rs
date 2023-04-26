@@ -11,6 +11,10 @@ const IMPLEMENTATION_NAMES: &[&'static str] = &[
     "bol_linearfancy",
     "bol_linelinear",
     "bol_linelinear8",
+    "bol_linelinear82",
+    "bol_linelinear83",
+    "bol_linelinear84",
+    "bol_linelinear85",
     "bol_linelinearsimd",
     "bol_table",
 ];
