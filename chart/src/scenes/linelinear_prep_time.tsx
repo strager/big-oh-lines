@@ -83,9 +83,9 @@ function* generateScene(name, view) {
         xProgress={xSs[lookupCount]}
         labelProgress={1}
         label={`naïve (${lookupCount})`}
-        labelMinY={lookupCount === 1 ? -20 : -60}
+        labelMinY={lookupCount === 1 || lookupCount === 2 ? -20 : -60}
         labelProgress={labelProgressSs[lookupCount]}
-        color={colors.light_blue}
+        color={colors.orange}
       />;
     }
     function lineLinearChart(lookupCount) {
@@ -97,7 +97,7 @@ function* generateScene(name, view) {
         label={`line table (${lookupCount})`}
         labelMinY={createSignal(() => lookupCount === 1 ? -60 : (xSs[lookupCount]()/maxX)*-650 + -20)}
         labelProgress={labelProgressSs[lookupCount]}
-        color={colors.orange}
+        color={colors.light_blue}
       />;
     }
     view.add(<Node position={center}>
