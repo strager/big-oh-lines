@@ -13,6 +13,7 @@ struct BOL {
 impl BOL {
     fn new(text: &[u8]) -> BOL {
         let mut line_offsets: Vec<usize> = Vec::new();
+        line_offsets.reserve(text.len() / 32);
         line_offsets.push(0);
         for i in 0..text.len() {
             if text[i] == b'\n' {
