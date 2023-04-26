@@ -25,6 +25,9 @@ pub fn main() {
         "linelinear_time_0_len" => {
             linelinear_time_0_len(&mut out, &imps);
         }
+        "linelinear_prep_time" => {
+            linelinear_prep_time(&mut out, &imps);
+        }
         "linelinear_vs_bsearch_time" => {
             linelinear_vs_bsearch_time(&mut out, &imps);
         }
@@ -122,6 +125,38 @@ pub fn linelinear_time_0_len(out: &mut impl Write, imps: &[Implementation]) {
     }
 }
 
+pub fn linelinear_prep_time(out: &mut impl Write, imps: &[Implementation]) {
+    let offset_counts: &[usize] = &[1, 2, 3];
+    let mut line_counts: Vec<usize> = geomspace(1.0, 3_000.0, 10000)
+        .map(|raw_line_count: f64| raw_line_count as usize)
+        .collect();
+    line_counts.dedup();
+
+    for imp in imps {
+        if !(imp.name == "bol_linelinear" || imp.name == "bol_linear") {
+            continue;
+        }
+        for &line_count in &line_counts {
+            let text: Vec<u8> = generate_realisticish_text(line_count);
+            for &offset_count in offset_counts {
+                for (lookup_type, offsets) in [
+                    ("at end", vec![text.len() - 1; offset_count]),
+                ] {
+                    for _ in 0..5 {
+                        test_including_setup(out, &format!(
+                            "\"text_type\": \"realisticish\",\n\"text_lines\": {},\n\"text_bytes\": {},\n\"lookup_type\": \"{lookup_type}\",\n\"lookups\": {}",
+                            count_lines(&text),
+                            text.len(),
+                            offsets.len(),
+                        ),
+                            &text, &offsets, &imp);
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub fn linelinear_vs_bsearch_time(out: &mut impl Write, imps: &[Implementation]) {
     let mut line_counts: Vec<usize> = geomspace(1.0, 1_000.0, 10000)
         .map(|raw_line_count: f64| raw_line_count as usize)
@@ -159,6 +194,33 @@ fn test(
 ) {
     let mut bol: BOL = imp.create(text);
     let start: std::time::Instant = std::time::Instant::now();
+    for &offset in offsets {
+        bol.offset_to_line(offset);
+    }
+    let duration: std::time::Duration = start.elapsed();
+
+    if unsafe { NEED_COMMA } {
+        write!(out, ",\n");
+    }
+    write!(out, "{{\n");
+    write!(out, "{},\n", metadata_json);
+    write!(out, "\"imp\": \"{}\",\n", imp.name);
+    write!(out, "\"duration_ns\": {}\n", duration.as_nanos());
+    write!(out, "}}\n");
+    unsafe {
+        NEED_COMMA = true;
+    }
+}
+
+fn test_including_setup(
+    out: &mut impl Write,
+    metadata_json: &str,
+    text: &[u8],
+    offsets: &[usize],
+    imp: &Implementation,
+) {
+    let start: std::time::Instant = std::time::Instant::now();
+    let mut bol: BOL = imp.create(text);
     for &offset in offsets {
         bol.offset_to_line(offset);
     }
