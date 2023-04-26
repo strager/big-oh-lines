@@ -14,9 +14,10 @@ import {waitFor, waitUntil} from '@motion-canvas/core/lib/flow';
 import {ChartSeries, ChartXAxis, ChartYAxis, ChartXTick, ChartYTick, computeChartStuff, mergeSamplesMin, colors, font} from '../chart.tsx';
 import {ValueDispatcher} from '@motion-canvas/core/lib/events';
 
-let samples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at end' && sample.imp === 'bol_linelinear'));
+let linearSamples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at end' && sample.imp === 'bol_linear'));
+let lineLinearSamples = mergeSamplesMin(data.filter((sample) => sample.lookup_type === 'at end' && sample.imp === 'bol_linelinear'));
 
-let maxSampleY = Math.max(...samples.map((sample) => sample.memory));
+let maxSampleY = Math.max(...[...linearSamples, ...lineLinearSamples].map((sample) => sample.memory));
 
 function makeSubscene(name) {
   let scene = makeScene2D(function (view) { return generateScene(name, view); });
@@ -71,12 +72,21 @@ function* generateScene(name, view) {
       </Node>
       <ChartSeries
         position={chartPosition}
-        points={createSignal(() => samples.map((sample) => [getX(sample), getY(sample)]))}
+        points={createSignal(() => lineLinearSamples.map((sample) => [getX(sample), getY(sample)]))}
         xProgress={xS}
         labelProgress={1}
         label={'line table'}
-        labelMinY={-20}
+        labelMinY={-60}
         color={colors.light_blue}
+      />
+      <ChartSeries
+        position={chartPosition}
+        points={createSignal(() => linearSamples.map((sample) => [getX(sample), getY(sample)]))}
+        xProgress={xS}
+        labelProgress={1}
+        label={'naïve'}
+        labelMinY={-20}
+        color={colors.orange}
       />
     </Node>);
 
