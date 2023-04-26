@@ -1,7 +1,5 @@
-use bol_base::define_bol_c_api;
-
-#[cfg(feature = "bol_stats")]
 use bol_base::*;
+use bol_base::define_bol_c_api;
 
 struct BOL {
     // Offset in the text where each line starts, except the first line.
@@ -15,7 +13,7 @@ struct BOL {
 impl BOL {
     fn new(text: &[u8]) -> BOL {
         let mut line_offsets: Vec<usize> = Vec::new();
-        line_offsets.reserve(text.len() / 32);
+        line_offsets.reserve(text.len() / AVERAGE_BYTES_PER_LINE);
         for i in 0..text.len() {
             if text[i] == b'\n' {
                 line_offsets.push(i + 1)

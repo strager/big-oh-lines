@@ -1,12 +1,10 @@
 #![feature(iter_array_chunks)]
 #![feature(portable_simd)]
 
+use bol_base::*;
 use bol_base::define_bol_c_api;
 use std::simd::SimdPartialOrd;
 use std::simd::ToBitMask;
-
-#[cfg(feature = "bol_stats")]
-use bol_base::*;
 
 const SIMD_LANES: usize = 8;
 
@@ -23,7 +21,7 @@ struct BOL {
 impl BOL {
     fn new(text: &[u8]) -> BOL {
         let mut line_offsets: Vec<usize> = Vec::new();
-        line_offsets.reserve(text.len() / 32);
+        line_offsets.reserve(text.len() / AVERAGE_BYTES_PER_LINE);
         for i in 0..text.len() {
             if text[i] == b'\n' {
                 line_offsets.push(i + 1)

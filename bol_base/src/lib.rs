@@ -7,6 +7,8 @@ pub struct BOLStats {
     pub memory: usize,
 }
 
+pub static AVERAGE_BYTES_PER_LINE: usize = 25;
+
 static LIVE_BYTES: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
 
 pub fn get_tracking_allocator_live_bytes() -> usize {
