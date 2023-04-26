@@ -12,8 +12,8 @@ import {scenes as linelinear_vs_bsearch_time_scenes} from './scenes/linelinear_v
 export default makeProject({
   //scenes: [...linear_time_0_len_scenes],
   //scenes: [...linelinear_time_0_len_scenes],
-  //scenes: [...linelinear_prep_time_scenes],
-  scenes: [...linelinear_mem_scenes],
+  scenes: [...linelinear_prep_time_scenes],
+  //scenes: [...linelinear_mem_scenes],
   //scenes: [...linelinear_stats_len_small_scenes],
   //scenes: [...linelinear_vs_bsearch_stats],
   //scenes: [...linelinear_vs_bsearch_time_scenes],

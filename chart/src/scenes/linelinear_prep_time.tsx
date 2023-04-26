@@ -95,8 +95,7 @@ function* generateScene(name, view) {
         xProgress={xSs[lookupCount]}
         labelProgress={1}
         label={`line table (${lookupCount})`}
-        labelMinY={createSignal(() => lookupCount === 1 ? -60 : (xSs[lookupCount]()/maxX)*-600 + -20)}
-        labelMaxY={lookupCount === 1 ? -520 : -9999}
+        labelMinY={createSignal(() => lookupCount === 1 ? -60 : (xSs[lookupCount]()/maxX)*-650 + -20)}
         labelProgress={labelProgressSs[lookupCount]}
         color={colors.orange}
       />;
