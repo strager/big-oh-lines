@@ -44,16 +44,14 @@ impl BOL {
             let offset_simd: Simd<usize, 8> = Simd::splat(offset);
             let matches: Mask<isize, 8> = offset_simd.simd_lt(line_offset_simd);
             let matches: [bool; 8] = matches.to_array();
-            if matches.iter().any(|b| *b) {
-                if matches[0] { return i+1; }
-                if matches[1] { return i+2; }
-                if matches[2] { return i+3; }
-                if matches[3] { return i+4; }
-                if matches[4] { return i+5; }
-                if matches[5] { return i+6; }
-                if matches[6] { return i+7; }
-                if matches[7] { return i+8; }
-            }
+            if matches[0] { return i+1; }
+            if matches[1] { return i+2; }
+            if matches[2] { return i+3; }
+            if matches[3] { return i+4; }
+            if matches[4] { return i+5; }
+            if matches[5] { return i+6; }
+            if matches[6] { return i+7; }
+            if matches[7] { return i+8; }
             i += 8;
         }
         self.line_count + 1
