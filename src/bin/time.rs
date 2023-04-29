@@ -31,6 +31,9 @@ pub fn main() {
         "linelinear_vs_bsearch_time" => {
             linelinear_vs_bsearch_time(&mut out, &imps);
         }
+        "linelinear_simd_evolution_time" => {
+            linelinear_simd_evolution_time(&mut out, &imps);
+        }
         "linelinear_simd_long_time" => {
             linelinear_simd_long_time(&mut out, &imps);
         }
@@ -175,6 +178,29 @@ pub fn linelinear_vs_bsearch_time(out: &mut impl Write, imps: &[Implementation])
                 let text: Vec<u8> = generate_realisticish_text(line_count);
                 let offsets: Vec<usize> = generate_uniform_offsets(&text, 500);
                 for _ in 0..5 {
+                    test(out, &format!(
+                        "\"text_type\": \"realisticish\",\n\"text_lines\": {},\n\"text_bytes\": {},\n\"lookup_type\": \"exhaustive\",\n\"lookups\": {}",
+                        count_lines(&text),
+                        text.len(),
+                        offsets.len(),
+                    ),
+                        &text, &offsets, &imp);
+                }
+            }
+        }
+    }
+}
+
+pub fn linelinear_simd_evolution_time(out: &mut impl Write, imps: &[Implementation]) {
+    for imp in imps {
+        if !imp.name.starts_with("bol_linelinear8") {
+            continue;
+        }
+        for _ in 0..10 {
+            for line_count in 1..200 {
+                let text: Vec<u8> = generate_realisticish_text(line_count);
+                let offsets: Vec<usize> = generate_uniform_offsets(&text, 500);
+                for _ in 0..10 {
                     test(out, &format!(
                         "\"text_type\": \"realisticish\",\n\"text_lines\": {},\n\"text_bytes\": {},\n\"lookup_type\": \"exhaustive\",\n\"lookups\": {}",
                         count_lines(&text),

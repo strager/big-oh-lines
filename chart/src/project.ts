@@ -8,6 +8,7 @@ import {scenes as linelinear_mem_scenes} from './scenes/linelinear_mem';
 import {scenes as linelinear_stats_len_small_scenes} from './scenes/linelinear_stats_len_small';
 import {scenes as linelinear_vs_bsearch_stats} from './scenes/linelinear_vs_bsearch_stats';
 import {scenes as linelinear_vs_bsearch_time_scenes} from './scenes/linelinear_vs_bsearch_time';
+import {scenes as linelinear_simd_evolution_time_scenes} from './scenes/linelinear_simd_evolution_time';
 import {scenes as linelinear_simd_long_time_scenes} from './scenes/linelinear_simd_long_time';
 
 export default makeProject({
@@ -18,5 +19,6 @@ export default makeProject({
   //scenes: [...linelinear_stats_len_small_scenes],
   //scenes: [...linelinear_vs_bsearch_stats],
   //scenes: [...linelinear_vs_bsearch_time_scenes],
-  scenes: [...linelinear_simd_long_time_scenes],
+  scenes: [...linelinear_simd_evolution_time_scenes],
+  //scenes: [...linelinear_simd_long_time_scenes],
 });

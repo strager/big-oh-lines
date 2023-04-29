@@ -15,4 +15,5 @@ International License (CC-BY-NC-ND-4.0)](LICENSE)
     $ cargo +nightly run --release --bin=stats --features=bol_stats linelinear_stats_len_small >data/linelinear_stats_len_small.json
     $ cargo +nightly run --release --bin=stats --features=bol_stats linelinear_vs_bsearch_stats >data/linelinear_vs_bsearch_stats.json
     $ RUSTFLAGS='-Ctarget-feature=+avx2,+sse4.2' cargo +nightly run --release --bin=time linelinear_vs_bsearch_time >data/linelinear_vs_bsearch_time.json
+    $ RUSTFLAGS='-Ctarget-feature=+avx2,+sse4.2' cargo +nightly run --release --bin=time linelinear_simd_evolution_time >data/linelinear_simd_evolution_time.json
     $ RUSTFLAGS='-Ctarget-feature=+avx2,+sse4.2' cargo +nightly run --release --bin=time linelinear_simd_long_time >data/linelinear_simd_long_time.json
