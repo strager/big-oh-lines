@@ -31,6 +31,9 @@ pub fn main() {
         "linelinear_vs_bsearch_time" => {
             linelinear_vs_bsearch_time(&mut out, &imps);
         }
+        "linelinear_simd_long_time" => {
+            linelinear_simd_long_time(&mut out, &imps);
+        }
         _ => {
             eprintln!("error: unknown scenario: {scenario_name}");
         }
@@ -165,6 +168,34 @@ pub fn linelinear_vs_bsearch_time(out: &mut impl Write, imps: &[Implementation])
 
     for imp in imps {
         if !(imp.name == "bol_linelinear" || imp.name == "bol_linelinearsimd" || imp.name == "bol_bsearch") {
+            continue;
+        }
+        for _ in 0..3 {
+            for &line_count in &line_counts {
+                let text: Vec<u8> = generate_realisticish_text(line_count);
+                let offsets: Vec<usize> = generate_uniform_offsets(&text, 500);
+                for _ in 0..5 {
+                    test(out, &format!(
+                        "\"text_type\": \"realisticish\",\n\"text_lines\": {},\n\"text_bytes\": {},\n\"lookup_type\": \"exhaustive\",\n\"lookups\": {}",
+                        count_lines(&text),
+                        text.len(),
+                        offsets.len(),
+                    ),
+                        &text, &offsets, &imp);
+                }
+            }
+        }
+    }
+}
+
+pub fn linelinear_simd_long_time(out: &mut impl Write, imps: &[Implementation]) {
+    let mut line_counts: Vec<usize> = geomspace(1_000.0, 50_000.0, 2000)
+        .map(|raw_line_count: f64| raw_line_count as usize)
+        .collect();
+    line_counts.dedup();
+
+    for imp in imps {
+        if imp.name != "bol_linelinearsimd" {
             continue;
         }
         for _ in 0..3 {

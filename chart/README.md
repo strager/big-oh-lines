@@ -17,3 +17,4 @@ Then create .mp4 files:
     $ ./chart/encode.sh linelinear_mem.data
     $ ./chart/encode.sh linelinear_vs_bsearch_stats.bigticks linelinear_vs_bsearch_stats.data linelinear_vs_bsearch_stats.log linelinear_vs_bsearch_stats.loground linelinear_vs_bsearch_stats.zoom
     $ ./chart/encode.sh linelinear_vs_bsearch_time.data linelinear_vs_bsearch_time.zoom linelinear_vs_bsearch_time.simd linelinear_vs_bsearch_time.unzoom
+    $ ./chart/encode.sh linelinear_simd_long_time.unzoom
