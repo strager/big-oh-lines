@@ -57,7 +57,7 @@ function* generateScene(name, view) {
     }
     let maxX = maxSampleX * xSampleToScreenOrig;
 
-    let zoomedSampleY = 8000;
+    let zoomedSampleY = 9000;
     function getY(sample) {
       let zoom = zoomS();
       let scale = zoom*(1/zoomedSampleY) + (1-zoom)*(1/maxSampleY);
